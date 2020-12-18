@@ -98,7 +98,7 @@ def convert_from_wgs_84(crs_code: int, xxyy: Tuple[float,float])-> Tuple[float, 
 
 
 
-def read_box(input_file: str, uid: str, bBox: list):
+def read_box(input_file: str, bBox: list):
     tif = TiffFile(input_file)
     def get_x_int(lon):
         step_x = tifShape[1]/(tif_bBox[1][0] - tif_bBox[0][0])
