@@ -1,0 +1,7 @@
+colorlog
+pytest
+shapely
+tifffile
+numpy
+pyproj
+zarr
