@@ -112,8 +112,7 @@ def read_box(input_file: str, bBox: list):
         scale = tif.geotiff_metadata['ModelPixelScale']
         tilePoint = tif.geotiff_metadata['ModelTiepoint']
         stats = TifStats(tifShape[0], tifShape[1], scale, tilePoint)
-        b_bBox = [(bBox[0], bBox[3]), (bBox[2], bBox[1])]
-        log.warning(b_bBox)
+        b_bBox = bBox
         tif_bBox = [stats.get_xy(0,0), stats.get_xy(tifShape[1],tifShape[0])]
         b_bBox = [convert_from_wgs_84(crs_code,c) for c in b_bBox]
         x_min = get_x_int(b_bBox[0][0])
@@ -134,10 +133,8 @@ def read_box(input_file: str, bBox: list):
             raise BoundaryNotInTifError()
         store = imread(input_file, aszarr=True)
         z = zarr.open(store, mode='r')
-        log.warning([y_min,y_max, x_min,x_max])
 
         cut_tif_array = z[y_min:y_max, x_min:x_max] 
-        log.info(cut_tif_array)
 
         store.close()
 
