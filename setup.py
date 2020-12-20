@@ -32,7 +32,7 @@ setuptools.setup(
     description="A noGDAL tool for reading and writing geotiff files",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/KipCrossing/geotiff",
+    url="https://github.com/Open-Source-Agriculture/geotiff",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
