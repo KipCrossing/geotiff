@@ -5,6 +5,10 @@ from setuptools.command.install import install
 
 VERSION = "0.0.1a1"
 
+# Send to pypi
+# python3 setup.py sdist bdist_wheel
+# twine upload dist/*
+
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
