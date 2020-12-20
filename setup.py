@@ -3,7 +3,7 @@ import os
 import sys
 from setuptools.command.install import install
 
-VERSION = "0.0.1"
+VERSION = "0.0.1a1"
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
