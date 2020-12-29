@@ -28,6 +28,10 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Download test file
+      run: |
+        wget https://d28rz98at9flks.cloudfront.net/89644/cocosislandz47.zip
+        unzip cocosislandz47.zip -d /home/runner/work/geotiff/geotiff/tests/inputs
     - name: Test with pytest
       run: |
         python -m pytest -s
