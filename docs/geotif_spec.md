@@ -11,74 +11,7 @@ Date:  September 5, 1995
    Specification Version: 1.7 
    Last Modified: 13 July, 1995
 
-Authors:
 
-   Niles Ritter, Jet Propulsion Laboratory
-   Cartographic Applications Group
-   4800 Oak Grove Dr.
-   Pasadena, CA 91109
-   email:ndr@tazboy.jpl.nasa.gov      
-   
-   Mike Ruth, SPOT Image Corp
-   Product Development Group
-   1897 Preston White Dr.
-   Reston, VA 22091
-   email:ruth@spot.com
-
-Acknowledgements:
-
-GeoTIFF Working Group:
-    Mike Ruth, Niles Ritter, Ed Grissom, Brett Borup, George Galang,
-    John Haller, Gary Stephenson, Steve Covington, Tim Nagy, 
-    Jamie Moyers, Jim Stickley, Joe Messina, Yves Somer.
-
-Additional advice from discussions with Tom Lane, Sam Leffler regarding      
-TIFF implementations. 
-
-Roger Lott, Fredrik Lundh, and Jarle Land provided valuable information    
-regarding projections, projection code databases and geodetics.
-   
-GeoTIFF Mailing list:  
-
-    Posting: geotiff@tazboy.jpl.nasa.gov
-    Subscription: geotiff-request@tazboy.jpl.nasa.gov
-    (send message "subscribe geotiff your-name-here").
-   
-Disclaimers and Notes for This Version:
-
-This proposal has not been approved by SPOT, JPL, or any other 
-organization. This represents a proposal, which derives from many 
-discussions between an international body of TIFF users and developers.
- 
-The authors and their sponsors assume no liability for any special, 
-incidental, indirect or consequences of any kind, or any damages 
-whatsoever resulting from loss of use, data or profits, whether or not 
-advised of the possibility of damage, and on any theory of of liability, 
-arising out of or in connectionwith the use of this specification.
-
-Copyright
-
-Portions of this specification are copyrighted by Niles Ritter and Mike 
-Ruth. Permission to copy without fee all or part of this material is 
-granted provided that the copies are not made or distributed for direct 
-or commercial advantage and this copyright notice appears.
-  
-Licenses and Trademarks
-
-Aldus and Adobe are registered trademarks, and TIFF is a registered 
-trademark of Aldus Corp, now owned by Adobe. SPOT Image, ESRI, ERDAS, 
-ARC/Info, Intergraph and Softdesk are registered trademarks. 
-Concurrence
-
-  The following members of the GeoTIFF working group have reviewed and 
-approved of this revision. 
-   
-   Name                   Organization              Representing
-   --------------------   -----------------------   ------------
-   Niles Ritter           Jet Propulsion Labs       JPL Carto Group
-   Mike Ruth              SPOT Image Corp (USA)     SPOT Image Corp (USA)
-   
---------------------------------------------------------------------
 
 ## 1  Introduction  
 
@@ -4681,6 +4614,77 @@ in a single file.
 USGS - U.S. Geological Survey
 
 
----------------------------------------------------------------------, 
-              **END OF SPECIFICATION**
+## Credits 
+
+Authors:
+
+   Niles Ritter, Jet Propulsion Laboratory
+   Cartographic Applications Group
+   4800 Oak Grove Dr.
+   Pasadena, CA 91109
+   email:ndr@tazboy.jpl.nasa.gov      
+   
+   Mike Ruth, SPOT Image Corp
+   Product Development Group
+   1897 Preston White Dr.
+   Reston, VA 22091
+   email:ruth@spot.com
+
+Acknowledgements:
+
+GeoTIFF Working Group:
+    Mike Ruth, Niles Ritter, Ed Grissom, Brett Borup, George Galang,
+    John Haller, Gary Stephenson, Steve Covington, Tim Nagy, 
+    Jamie Moyers, Jim Stickley, Joe Messina, Yves Somer.
+
+Additional advice from discussions with Tom Lane, Sam Leffler regarding      
+TIFF implementations. 
+
+Roger Lott, Fredrik Lundh, and Jarle Land provided valuable information    
+regarding projections, projection code databases and geodetics.
+   
+GeoTIFF Mailing list:  
+
+    Posting: geotiff@tazboy.jpl.nasa.gov
+    Subscription: geotiff-request@tazboy.jpl.nasa.gov
+    (send message "subscribe geotiff your-name-here").
+   
+Disclaimers and Notes for This Version:
+
+This proposal has not been approved by SPOT, JPL, or any other 
+organization. This represents a proposal, which derives from many 
+discussions between an international body of TIFF users and developers.
+ 
+The authors and their sponsors assume no liability for any special, 
+incidental, indirect or consequences of any kind, or any damages 
+whatsoever resulting from loss of use, data or profits, whether or not 
+advised of the possibility of damage, and on any theory of of liability, 
+arising out of or in connectionwith the use of this specification.
+
+Copyright
+
+Portions of this specification are copyrighted by Niles Ritter and Mike 
+Ruth. Permission to copy without fee all or part of this material is 
+granted provided that the copies are not made or distributed for direct 
+or commercial advantage and this copyright notice appears.
+  
+Licenses and Trademarks
+
+Aldus and Adobe are registered trademarks, and TIFF is a registered 
+trademark of Aldus Corp, now owned by Adobe. SPOT Image, ESRI, ERDAS, 
+ARC/Info, Intergraph and Softdesk are registered trademarks. 
+Concurrence
+
+  The following members of the GeoTIFF working group have reviewed and 
+approved of this revision. 
+   
+   Name                   Organization              Representing
+   --------------------   -----------------------   ------------
+   Niles Ritter           Jet Propulsion Labs       JPL Carto Group
+   Mike Ruth              SPOT Image Corp (USA)     SPOT Image Corp (USA)
+   
+--------------------------------------------------------------------
+
+---------------------------------------------------------------------
+**END OF SPECIFICATION**
 ---------------------------------------------------------------------
