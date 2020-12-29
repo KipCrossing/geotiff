@@ -1,12 +1,13 @@
-from typing import Optional, Tuple
-from shapely.geometry import Point, Polygon
-from tifffile import imread, TiffFile
-import numpy as np
-from tifffile.tifffile_geodb import Proj, GCSE, PCS, GCS, Ellipse, DatumE, Datum
+from typing import List, Optional, Tuple
+from shapely.geometry import Point, Polygon # type: ignore
+from tifffile import imread, TiffFile # type: ignore
+import numpy as np # type: ignore
+from tifffile.tifffile_geodb import Proj, GCSE, PCS, GCS, Ellipse, DatumE, Datum # type: ignore
 from difflib import SequenceMatcher
 from pyproj import Transformer, CRS
-import zarr
-from .utils.geotiff_logging import log
+import zarr # type: ignore
+from .utils.geotiff_logging import log # type: ignore
+from numbers import Number
 
 class GeographicTypeGeoKeyError(Exception):
     pass
@@ -14,12 +15,12 @@ class GeographicTypeGeoKeyError(Exception):
 class BoundaryNotInTifError(Exception):
     pass
 
-class TifStats():
-    def __init__(self,  height, width, scale, tiepoints):
+class TifTransformer():
+    def __init__(self,  height: int, width: int, scale: List[float], tiepoints: List[float]):
         self.width = width
         self.height = height
         sx, sy, sz = scale  # ModelPixelScaleTag
-        transforms = []
+        transforms: List[List[List[float]]] = []
         for tp in range(0, len(tiepoints), 6):
             i, j, k, x, y, z = tiepoints[tp:tp+6]
             transforms.append([
@@ -27,20 +28,23 @@ class TifStats():
                 [0.0, -sy, 0.0, y + j * sy],
                 [0.0, 0.0, sz, z - k * sz],
                 [0.0, 0.0, 0.0, 1.0]])
-        if len(tiepoints) == 6:
-            transforms = transforms[0]
+        # if len(tiepoints) == 6:
+        #     transforms = transforms[0]
         self.transforms = transforms
         
-    def get_x(self, i,j):
+    def get_x(self, i: int, j: int) -> List[Number]:
         return(list(np.dot(self.transforms,[i,j,0,1]))[0])
 
-    def get_y(self, i,j):
+    def get_y(self, i: int, j: int) -> List[Number]:
         return(list(np.dot(self.transforms,[i,j,0,1]))[1])
 
-    def get_xy(self, i,j):
-        return(tuple(list(np.dot(self.transforms,[i,j,0,1]))[:2]))
+    def get_xy(self, i: int, j: int) -> Tuple[Number, Number]:
+        transformed: List[Number] = list(np.dot(self.transforms,[i,j,0,1]))
+        transformed_xy: List[Number] = transformed[:2]
+        print(transformed_xy)
+        return(transformed_xy[0][0], transformed_xy[0][1])
 
-def get_crs_code(geotiff_metadata, guess=True):
+def get_crs_code(geotiff_metadata: dict, guess: bool = True) -> int:
     projs = [(name, member.value) for name, member in Proj.__members__.items()]
     pcss = [(name, member.value) for name, member in PCS.__members__.items()]
     gcse = [(name, member.value) for name, member in GCSE.__members__.items()]
@@ -98,20 +102,20 @@ def convert_from_wgs_84(crs_code: int, xxyy: Tuple[float,float])-> Tuple[float, 
 
 
 
-def read_box(input_file: str, bBox: list):
+def read_box(input_file: str, bBox: list) -> List[List[int]]:
     tif = TiffFile(input_file)
-    def get_x_int(lon):
-        step_x = tifShape[1]/(tif_bBox[1][0] - tif_bBox[0][0])
+    def get_x_int(lon) -> int:
+        step_x: float = tifShape[1]/(tif_bBox[1][0] - tif_bBox[0][0])
         return(int(step_x*(lon - tif_bBox[0][0])))
-    def get_y_int(lat):
-        step_y = tifShape[0]/(tif_bBox[1][1] - tif_bBox[0][1])
+    def get_y_int(lat) -> int:
+        step_y: float = tifShape[0]/(tif_bBox[1][1] - tif_bBox[0][1])
         return(int(step_y*(lat - tif_bBox[0][1])))
     if tif.is_geotiff:
-        crs_code = get_crs_code(tif.geotiff_metadata)
+        crs_code: int = get_crs_code(tif.geotiff_metadata)
         tifShape = tif.asarray().shape
         scale = tif.geotiff_metadata['ModelPixelScale']
         tilePoint = tif.geotiff_metadata['ModelTiepoint']
-        stats = TifStats(tifShape[0], tifShape[1], scale, tilePoint)
+        stats = TifTransformer(tifShape[0], tifShape[1], scale, tilePoint)
         b_bBox = bBox
         tif_bBox = [stats.get_xy(0,0), stats.get_xy(tifShape[1],tifShape[0])]
         b_bBox = [convert_from_wgs_84(crs_code,c) for c in b_bBox]
