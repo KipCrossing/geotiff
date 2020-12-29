@@ -7,12 +7,12 @@ from geotiff.geotiff import read_box
 @pytest.fixture
 def tiff_file():
     filename = "dem.tif"
-    dir = "/home/kipling/Documents/fsm_sample_data"
+    dir = dir = "./tests/inputs/"
     return(os.path.join(dir, filename))
 
 @pytest.fixture
 def bounding_box():
-    return([(138.387681, -32.310286), (138.414326, -32.344569)])
+    return([(138.632071411, -32.447310785), (138.644218874, -32.456979174)])
 
 def test_read(tiff_file, bounding_box):
     log.info("testing read tiff")
