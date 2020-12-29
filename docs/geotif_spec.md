@@ -2618,6 +2618,8 @@ Values:
   Note: Geodetic datum using Greenwich PM have codes equal to
   the corresponding Datum code - 2000.
 
+```python
+
    GCS_Adindan =    4201
    GCS_AGD66 = 4202
    GCS_AGD84 = 4203
@@ -2751,12 +2753,14 @@ Values:
    GCS_Batavia_Jakarta = 4813
    GCS_ATF_Paris =  4901
    GCS_NDG_Paris =  4902
+```
 
 Ellipsoid-Only GCS:
 
    Note: the numeric code is equal to the code of the correspoding
    EPSG ellipsoid, minus 3000.
 
+```python
    GCSE_Airy1830 =  4001
    GCSE_AiryModified1849 =    4002
    GCSE_AustralianNationalSpheroid =    4003
@@ -2792,7 +2796,7 @@ Ellipsoid-Only GCS:
    GCSE_OSU91A =    4033
    GCSE_Clarke1880 =     4034
    GCSE_Sphere =    4035
-
+```
 
 ----------------------------------
 ##### 6.3.2.2 Geodetic Datum Codes
@@ -2817,6 +2821,8 @@ Ranges:
    [32768, 65535] = Private User Implementations
 
 Values:
+
+```python
 
    Datum_Adindan =  6201
    Datum_Australian_Geodetic_Datum_1966 =    6202
@@ -2938,12 +2944,14 @@ Values:
    Datum_WGS84 =    6326
    Datum_Ancienne_Triangulation_Francaise =  6901
    Datum_Nord_de_Guerre =     6902
+```
 
 Ellipsoid-Only Datum:
 
    Note: the numeric code is equal to the corresponding ellipsoid
    code, minus 1000.
 
+```python
    DatumE_Airy1830 =     6001
    DatumE_AiryModified1849 =  6002
    DatumE_AustralianNationalSpheroid =  6003
@@ -2979,7 +2987,7 @@ Ellipsoid-Only Datum:
    DatumE_OSU91A =  6033
    DatumE_Clarke1880 =   6034
    DatumE_Sphere =  6035
-
+```
 ----------------------------------
 ##### 6.3.2.3 Ellipsoid Codes
 
@@ -2995,6 +3003,7 @@ Ranges:
 
 Values:
 
+```python
    Ellipse_Airy_1830 =   7001
    Ellipse_Airy_Modified_1849 =    7002
    Ellipse_Australian_National_Spheroid =    7003
@@ -3030,6 +3039,7 @@ Values:
    Ellipse_OSU91A = 7033
    Ellipse_Clarke_1880 = 7034
    Ellipse_Sphere = 7035
+```
 
 ----------------------------------
 ##### 6.3.2.4 Prime Meridian Codes
@@ -3046,6 +3056,7 @@ Ranges:
 
 Values:
 
+```python
    PM_Greenwich =   8901
    PM_Lisbon = 8902
    PM_Paris =  8903
@@ -3057,7 +3068,7 @@ Values:
    PM_Ferro =  8909
    PM_Brussels =    8910
    PM_Stockholm =   8911
-
+```
 
 
 ----------------------------------
@@ -3096,6 +3107,7 @@ xxx is a sequential number.
 
 Values:
 
+```python
    PCS_Adindan_UTM_zone_37N = 20137
    PCS_Adindan_UTM_zone_38N = 20138
    PCS_AGD66_AMG_zone_48 =    20248
@@ -3244,7 +3256,7 @@ Values:
    PCS_Kertau_UTM_zone_48N =  24548
    PCS_La_Canoa_UTM_zone_20N =     24720
 
-
+
    PCS_La_Canoa_UTM_zone_21N =     24721
    PCS_PSAD56_UTM_zone_18N =  24818
    PCS_PSAD56_UTM_zone_19N =  24819
@@ -4046,7 +4058,7 @@ Values:
    PCS_WGS84_UTM_zone_28S =   32728
    PCS_WGS84_UTM_zone_29S =   32729
 
-
+
    PCS_WGS84_UTM_zone_30S =   32730
    PCS_WGS84_UTM_zone_31S =   32731
    PCS_WGS84_UTM_zone_32S =   32732
@@ -4078,6 +4090,7 @@ Values:
    PCS_WGS84_UTM_zone_58S =   32758
    PCS_WGS84_UTM_zone_59S =   32759
    PCS_WGS84_UTM_zone_60S =   32760
+```
 
 ----------------------------------
 ##### 6.3.3.2 Projection Codes
@@ -4117,6 +4130,7 @@ Special Ranges:
           where ss is sequential system number    
 
 Values:
+```python
 
    Proj_Alabama_CS27_East =   10101
    Proj_Alabama_CS27_West =   10102
@@ -4416,7 +4430,7 @@ Values:
    Proj_Bahrain_Grid =   19900
    Proj_Netherlands_E_Indies_Equatorial =    19905
    Proj_RSO_Borneo =     19912
-
+```
 
 ----------------------------------
 ##### 6.3.3.3 Coordinate Transformation Codes
@@ -4431,6 +4445,7 @@ Ranges:
 
 Values:
 
+```python
    CT_TransverseMercator =    1
    CT_TransvMercator_Modified_Alaska = 2
    CT_ObliqueMercator =  3
@@ -4458,6 +4473,7 @@ Values:
    CT_VanDerGrinten =    25
    CT_NewZealandMapGrid =     26
    CT_SouthOrientedGaussConformal =     27
+```
 
 Aliases:
 
@@ -4485,7 +4501,7 @@ Ranges:
    [32768, 65535]  = Private User Implementations
 
 Values:
-
+```python
    VertCS_Airy_1830_ellipsoid =    5001
    VertCS_Airy_Modified_1849_ellipsoid =     5002
    VertCS_ANS_ellipsoid =     5003
@@ -4518,6 +4534,7 @@ Values:
    VertCS_GEM_10C_ellipsoid = 5031
    VertCS_OSU86F_ellipsoid =  5032
    VertCS_OSU91A_ellipsoid =  5033
+```
 
   Orthometric Vertical CS;
 
@@ -4667,6 +4684,3 @@ USGS - U.S. Geological Survey
 ---------------------------------------------------------------------, 
               **END OF SPECIFICATION**
 ---------------------------------------------------------------------
-
-
-
