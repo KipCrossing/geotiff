@@ -7,7 +7,7 @@ from difflib import SequenceMatcher
 from pyproj import Transformer, CRS
 import zarr # type: ignore
 from .utils.geotiff_logging import log # type: ignore
-from numbers import Number
+# from numbers import Number
 
 class GeographicTypeGeoKeyError(Exception):
     pass
@@ -32,17 +32,18 @@ class TifTransformer():
         #     transforms = transforms[0]
         self.transforms = transforms
         
-    def get_x(self, i: int, j: int) -> List[Number]:
+    def get_x(self, i: int, j: int) -> List[float]:
         return(list(np.dot(self.transforms,[i,j,0,1]))[0])
 
-    def get_y(self, i: int, j: int) -> List[Number]:
+    def get_y(self, i: int, j: int) -> List[float]:
         return(list(np.dot(self.transforms,[i,j,0,1]))[1])
 
-    def get_xy(self, i: int, j: int) -> Tuple[Number, Number]:
-        transformed: List[Number] = list(np.dot(self.transforms,[i,j,0,1]))
-        transformed_xy: List[Number] = transformed[:2]
+    def get_xy(self, i: int, j: int) -> Tuple[float, float]:
+        transformed: List[float] = np.dot(self.transforms,[i,j,0,1]).tolist()[0]
+        transformed_xy: List[float] = transformed[:2]
+        print("transformed_xy")
         print(transformed_xy)
-        return(transformed_xy[0][0], transformed_xy[0][1])
+        return(transformed_xy[0], transformed_xy[1])
 
 def get_crs_code(geotiff_metadata: dict, guess: bool = True) -> int:
     projs = [(name, member.value) for name, member in Proj.__members__.items()]
@@ -104,21 +105,27 @@ def convert_from_wgs_84(crs_code: int, xxyy: Tuple[float,float])-> Tuple[float, 
 
 def read_box(input_file: str, bBox: list) -> List[List[int]]:
     tif = TiffFile(input_file)
-    def get_x_int(lon) -> int:
-        step_x: float = tifShape[1]/(tif_bBox[1][0] - tif_bBox[0][0])
-        return(int(step_x*(lon - tif_bBox[0][0])))
-    def get_y_int(lat) -> int:
-        step_y: float = tifShape[0]/(tif_bBox[1][1] - tif_bBox[0][1])
-        return(int(step_y*(lat - tif_bBox[0][1])))
+    cut_tif_array = []
+
+
+    
     if tif.is_geotiff:
         crs_code: int = get_crs_code(tif.geotiff_metadata)
-        tifShape = tif.asarray().shape
+        tifShape: List[int] = tif.asarray().shape
         scale = tif.geotiff_metadata['ModelPixelScale']
         tilePoint = tif.geotiff_metadata['ModelTiepoint']
         stats = TifTransformer(tifShape[0], tifShape[1], scale, tilePoint)
         b_bBox = bBox
         tif_bBox = [stats.get_xy(0,0), stats.get_xy(tifShape[1],tifShape[0])]
         b_bBox = [convert_from_wgs_84(crs_code,c) for c in b_bBox]
+
+        def get_x_int(lon) -> int:
+            step_x: float = float(tifShape[1]/(tif_bBox[1][0] - tif_bBox[0][0]))
+            return(int(step_x*(lon - tif_bBox[0][0])))
+        def get_y_int(lat) -> int:
+            step_y: float = tifShape[0]/(tif_bBox[1][1] - tif_bBox[0][1])
+            return(int(step_y*(lat - tif_bBox[0][1])))
+
         x_min = get_x_int(b_bBox[0][0])
         x_max = get_x_int(b_bBox[1][0])
         y_min = get_y_int(b_bBox[0][1])
@@ -142,5 +149,5 @@ def read_box(input_file: str, bBox: list) -> List[List[int]]:
 
         store.close()
 
-        return(cut_tif_array)
+    return(cut_tif_array)
 
