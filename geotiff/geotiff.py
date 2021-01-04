@@ -128,7 +128,7 @@ def read_box(input_file: str, bBox: list) -> List[List[int]]:
             step_y: float = tifShape[0]/(tif_bBox[1][1] - tif_bBox[0][1])
             return(int(step_y*(lat - tif_bBox[0][1])))
 
-        x_min = get_x_int(b_bBox[0][0])
+        x_min: str = get_x_int(b_bBox[0][0])
         x_max = get_x_int(b_bBox[1][0])
         y_min = get_y_int(b_bBox[0][1])
         y_max = get_y_int(b_bBox[1][1])
