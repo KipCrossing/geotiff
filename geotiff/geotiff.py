@@ -7,10 +7,11 @@ from difflib import SequenceMatcher
 from pyproj import Transformer, CRS
 import zarr # type: ignore
 from .utils.geotiff_logging import log # type: ignore
-# from numbers import Number
 
 class GeographicTypeGeoKeyError(Exception):
-    pass
+    def __init__(_):
+        log.error("We could not recognize the geo key\nPlease submit an issue: \
+                https://github.com/Open-Source-Agriculture/geotiff/issues")
 
 class BoundaryNotInTifError(Exception):
     pass
@@ -41,8 +42,8 @@ class TifTransformer():
     def get_xy(self, i: int, j: int) -> Tuple[float, float]:
         transformed: List[float] = np.dot(self.transforms,[i,j,0,1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
-        print("transformed_xy")
-        print(transformed_xy)
+        log.debug("transformed_xy")
+        log.debug(transformed_xy)
         return(transformed_xy[0], transformed_xy[1])
 
 def get_crs_code(geotiff_metadata: dict, guess: bool = True) -> int:
@@ -65,6 +66,7 @@ def get_crs_code(geotiff_metadata: dict, guess: bool = True) -> int:
 
     log.info(temp_crs_code)
     if temp_crs_code == 32767 and guess:
+        # takes a guess based on the GTCitationGeoKey
         info_str = str(geotiff_metadata["GTCitationGeoKey"])
         best_score = 0.0
         crs_key = ""
@@ -132,12 +134,12 @@ def read_box(input_file: str, bBox: list) -> List[List[int]]:
         y_max = get_y_int(b_bBox[1][1])
         # # TODO use this to make check 
         # shp_bBox = [stats.get_xy(x_min,y_min),  stats.get_xy(x_max+1,y_max+1)]
-        # print(shp_bBox)
-        # print(b_bBox)
-        # print(shp_bBox[0][0] < b_bBox[0][0])
-        # print(shp_bBox[1][0] > b_bBox[1][0])
-        # print(shp_bBox[0][1] > b_bBox[0][1])
-        # print(shp_bBox[1][1] < b_bBox[1][1])
+        # log.debug(shp_bBox)
+        # log.debug(b_bBox)
+        # log.debug(shp_bBox[0][0] < b_bBox[0][0])
+        # log.debug(shp_bBox[1][0] > b_bBox[1][0])
+        # log.debug(shp_bBox[0][1] > b_bBox[0][1])
+        # log.debug(shp_bBox[1][1] < b_bBox[1][1])
         tif_poly = Polygon([(tif_bBox[0][0],tif_bBox[0][1]),(tif_bBox[0][0],tif_bBox[1][1]), (tif_bBox[1][0],tif_bBox[1][1]),(tif_bBox[1][0],tif_bBox[0][1])])
         b_poly = Polygon([(b_bBox[0][0],b_bBox[0][1]),(b_bBox[0][0],b_bBox[1][1]), (b_bBox[1][0],b_bBox[1][1]),(b_bBox[1][0],b_bBox[0][1])])
         if not tif_poly.contains(b_poly):
