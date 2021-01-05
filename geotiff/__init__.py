@@ -9,6 +9,7 @@ import zarr  # type: ignore
 from .utils.geotiff_logging import log  # type: ignore
 
 BBox = Tuple[Tuple[float,float], Tuple[float,float]]
+BBoxInt = Tuple[Tuple[int,int], Tuple[int,int]]
 
 class GeographicTypeGeoKeyError(Exception):
     def __init__(_):
@@ -66,6 +67,7 @@ class GeoTiff():
         scale: Tuple[float, float, float] = tif.geotiff_metadata['ModelPixelScale']
         tilePoint: List[float] = tif.geotiff_metadata['ModelTiepoint']
         self.tifTrans: TifTransformer = TifTransformer(self.tifShape[0], self.tifShape[1], scale, tilePoint)
+        self.tif_bBox: BBox = (self.tifTrans.get_xy(0, 0), self.tifTrans.get_xy(self.tifShape[1], self.tifShape[0]))
         
 
 
@@ -137,26 +139,22 @@ class GeoTiff():
             crs_4326, crs_proj, always_xy=True)
         return(transformer.transform(xx, yy))
 
+    def _get_x_int(self, lon) -> int:
+        step_x: float = float(
+            self.tifShape[1]/(self.tif_bBox[1][0] - self.tif_bBox[0][0]))
+        return(int(step_x*(lon - self.tif_bBox[0][0])))
 
-    def read_box(self, bBox: BBox) -> List[List[Union[int,float]]]:
+    def _get_y_int(self, lat) -> int:
+        step_y: float = self.tifShape[0]/(self.tif_bBox[1][1] - self.tif_bBox[0][1])
+        return(int(step_y*(lat - self.tif_bBox[0][1])))
 
-        b_bBox: BBox = bBox
-        tif_bBox: BBox = (self.tifTrans.get_xy(0, 0), self.tifTrans.get_xy(self.tifShape[1], self.tifShape[0]))
-        b_bBox = (self.convert_from_wgs_84(self.crs_code, b_bBox[0]), self.convert_from_wgs_84(self.crs_code, b_bBox[1]))
+    def get_int_box(self, bBox: BBox) -> BBoxInt:
+        b_bBox = (self.convert_from_wgs_84(self.crs_code, bBox[0]), self.convert_from_wgs_84(self.crs_code, bBox[1]))
+        x_min: int = self._get_x_int(b_bBox[0][0])
+        y_min: int = self._get_y_int(b_bBox[0][1])
+        x_max: int = self._get_x_int(b_bBox[1][0])
+        y_max: int = self._get_y_int(b_bBox[1][1])
 
-        def get_x_int(lon) -> int:
-            step_x: float = float(
-                self.tifShape[1]/(tif_bBox[1][0] - tif_bBox[0][0]))
-            return(int(step_x*(lon - tif_bBox[0][0])))
-
-        def get_y_int(lat) -> int:
-            step_y: float = self.tifShape[0]/(tif_bBox[1][1] - tif_bBox[0][1])
-            return(int(step_y*(lat - tif_bBox[0][1])))
-
-        x_min: int = get_x_int(b_bBox[0][0])
-        x_max: int = get_x_int(b_bBox[1][0])
-        y_min: int = get_y_int(b_bBox[0][1])
-        y_max: int = get_y_int(b_bBox[1][1])
         shp_bBox = [self.tifTrans.get_xy(x_min,y_min),  self.tifTrans.get_xy(x_max+1,y_max+1)]
         log.debug(shp_bBox)
         log.debug(b_bBox)
@@ -169,15 +167,20 @@ class GeoTiff():
             raise BoundaryNotInTifError()
         else:
             log.info("Boundary is in tiff")
-        tif_poly: Polygon = Polygon([(tif_bBox[0][0], tif_bBox[0][1]), (tif_bBox[0][0], tif_bBox[1][1]),
-                            (tif_bBox[1][0], tif_bBox[1][1]), (tif_bBox[1][0], tif_bBox[0][1])])
+        tif_poly: Polygon = Polygon([(self.tif_bBox[0][0], self.tif_bBox[0][1]), (self.tif_bBox[0][0], self.tif_bBox[1][1]),
+                            (self.tif_bBox[1][0], self.tif_bBox[1][1]), (self.tif_bBox[1][0], self.tif_bBox[0][1])])
         b_poly: Polygon = Polygon([(b_bBox[0][0], b_bBox[0][1]), (b_bBox[0][0], b_bBox[1][1]),
                         (b_bBox[1][0], b_bBox[1][1]), (b_bBox[1][0], b_bBox[0][1])])
         if not tif_poly.contains(b_poly):
             raise BoundaryNotInTifError()
+        
+        return(((x_min,y_min),(x_max,y_max)))
+
+
+    def read_box(self, bBox: BBox) -> List[List[Union[int,float]]]:
+        ((x_min,y_min),(x_max,y_max)) = self.get_int_box(bBox)
         store = imread(self.file, aszarr=True)
         z = zarr.open(store, mode='r')
-
         cut_tif_array: List[List[Union[int,float]]] = z[y_min:y_max, x_min:x_max]
         store.close()
         return(cut_tif_array)
