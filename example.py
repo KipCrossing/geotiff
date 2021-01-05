@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple
 import numpy as np # type: ignore
 import os
 from geotiff.utils.geotiff_logging import log # type: ignore
-from geotiff.geotiff import read_box # type: ignore
+from geotiff import read_box # type: ignore
 
 
 filename = "dem.tif"
