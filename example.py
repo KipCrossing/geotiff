@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple
 import numpy as np # type: ignore
 import os
 from geotiff.utils.geotiff_logging import log # type: ignore
-from geotiff import read_box # type: ignore
+from geotiff import GeoTiff # type: ignore
 
 
 filename = "dem.tif"
@@ -15,7 +15,7 @@ bounding_box: List[Tuple[float, float]] = [(138.632071411, -32.447310785), (138.
 log.info("testing read tiff")
 log.debug(f"reading: {tiff_file}")
 log.debug(f"Using bBox: {bounding_box}")
-array = read_box(tiff_file, bounding_box)
+array = GeoTiff(tiff_file).read_box(bounding_box)
 log.debug("Sample array:")
 log.debug(array)
 log.debug(array.shape)

@@ -15,7 +15,6 @@ class GeographicTypeGeoKeyError(Exception):
         log.error("We could not recognize the geo key\nPlease submit an issue: \
                 https://github.com/Open-Source-Agriculture/geotiff/issues")
 
-
 class BoundaryNotInTifError(Exception):
     pass
 
@@ -52,96 +51,108 @@ class TifTransformer():
         return(transformed_xy[0], transformed_xy[1])
 
 
-def get_crs_code(geotiff_metadata: dict, guess: bool = True) -> int:
-    PreDict = List[Tuple[str, int]]
-    projs: PreDict = [(name, member.value)
-                      for name, member in Proj.__members__.items()]
-    pcss: PreDict = [(name, member.value)
-                     for name, member in PCS.__members__.items()]
-    gcse: PreDict = [(name, member.value)
-                     for name, member in GCSE.__members__.items()]
-    gcs: PreDict = [(name, member.value)
-                    for name, member in GCS.__members__.items()]
-    # ! handel these!
-    ellipse: PreDict = [(name, member.value)
-                        for name, member in Ellipse.__members__.items()]
-    datumE: PreDict = [(name, member.value)
-                       for name, member in DatumE.__members__.items()]
-    datum: PreDict = [(name, member.value)
-                      for name, member in Datum.__members__.items()]
-    all_crs = dict(projs + pcss + gcse + gcs)  # + ellipse + datumE + datum)
-    temp_crs_code: int = 32767
-    if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
-        log.info("PROJECTED")
-        temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
-    elif geotiff_metadata["GTModelTypeGeoKey"].value == 2:
-        log.info("GEO")
-        temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
-
-    log.info(temp_crs_code)
-    if temp_crs_code == 32767 and guess:
-        # takes a guess based on the GTCitationGeoKey
-        info_str: str = str(geotiff_metadata["GTCitationGeoKey"])
-        best_score: float = 0.0
-        crs_key: str = ""
-        for crs in all_crs.keys():
-            score: float = SequenceMatcher(None, info_str, str(crs)).ratio()
-            if score > best_score:
-                best_score = score
-                crs_key = crs
-        if best_score < 0.4:
-            raise GeographicTypeGeoKeyError()
-        crs_code = all_crs[crs_key]
-        return(crs_code)
-    elif temp_crs_code in all_crs.values():
-        crs_code = temp_crs_code
-        return(crs_code)
-    else:
-        log.error(temp_crs_code)
-        raise GeographicTypeGeoKeyError()
 
 
-def convert_to_wgs_84(crs_code: int, xxyy: Tuple[float, float]) -> Tuple[float, float]:
-    xx: float = xxyy[0]
-    yy: float = xxyy[1]
-    crs_4326: CRS = CRS("WGS84")
-    crs_proj: CRS = CRS.from_epsg(crs_code)
-    transformer: Transformer = Transformer.from_crs(
-        crs_proj, crs_4326, always_xy=True)
-    return(transformer.transform(xx, yy))
+class GeoTiff():
+    def __init__(self, file):
+        self.file = file
+        tif = TiffFile(self.file)
 
+        if not tif.is_geotiff:
+            raise Exception("Not a geotiff file")
 
-def convert_from_wgs_84(crs_code: int, xxyy: Tuple[float, float]) -> Tuple[float, float]:
-    xx: float = xxyy[0]
-    yy: float = xxyy[1]
-    crs_4326: CRS = CRS("WGS84")
-    crs_proj: CRS = CRS.from_epsg(crs_code)
-    transformer: Transformer = Transformer.from_crs(
-        crs_4326, crs_proj, always_xy=True)
-    return(transformer.transform(xx, yy))
-
-
-def read_box(input_file: str, bBox: BBox) -> List[List[Union[int,float]]]:
-    tif = TiffFile(input_file)
-    cut_tif_array: List[List[Union[int,float]]] = []
-
-    if tif.is_geotiff:
-        crs_code: int = get_crs_code(tif.geotiff_metadata)
-        tifShape: List[int] = tif.asarray().shape
+        self.crs_code: int = self.get_crs_code(tif.geotiff_metadata)
+        self.tifShape: List[int] = tif.asarray().shape
         scale: Tuple[float, float, float] = tif.geotiff_metadata['ModelPixelScale']
         tilePoint: List[float] = tif.geotiff_metadata['ModelTiepoint']
-        tifTrans: TifTransformer = TifTransformer(tifShape[0], tifShape[1], scale, tilePoint)
+        self.tifTrans: TifTransformer = TifTransformer(self.tifShape[0], self.tifShape[1], scale, tilePoint)
+        
+
+
+    def get_crs_code(self, geotiff_metadata: dict, guess: bool = True) -> int:
+        PreDict = List[Tuple[str, int]]
+        projs: PreDict = [(name, member.value)
+                        for name, member in Proj.__members__.items()]
+        pcss: PreDict = [(name, member.value)
+                        for name, member in PCS.__members__.items()]
+        gcse: PreDict = [(name, member.value)
+                        for name, member in GCSE.__members__.items()]
+        gcs: PreDict = [(name, member.value)
+                        for name, member in GCS.__members__.items()]
+        # ! handel these!
+        ellipse: PreDict = [(name, member.value)
+                            for name, member in Ellipse.__members__.items()]
+        datumE: PreDict = [(name, member.value)
+                        for name, member in DatumE.__members__.items()]
+        datum: PreDict = [(name, member.value)
+                        for name, member in Datum.__members__.items()]
+        all_crs = dict(projs + pcss + gcse + gcs)  # + ellipse + datumE + datum)
+        temp_crs_code: int = 32767
+        if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
+            log.info("PROJECTED")
+            temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
+        elif geotiff_metadata["GTModelTypeGeoKey"].value == 2:
+            log.info("GEO")
+            temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
+
+        log.info(temp_crs_code)
+        if temp_crs_code == 32767 and guess:
+            # takes a guess based on the GTCitationGeoKey
+            info_str: str = str(geotiff_metadata["GTCitationGeoKey"])
+            best_score: float = 0.0
+            crs_key: str = ""
+            for crs in all_crs.keys():
+                score: float = SequenceMatcher(None, info_str, str(crs)).ratio()
+                if score > best_score:
+                    best_score = score
+                    crs_key = crs
+            if best_score < 0.4:
+                raise GeographicTypeGeoKeyError()
+            crs_code = all_crs[crs_key]
+            return(crs_code)
+        elif temp_crs_code in all_crs.values():
+            crs_code = temp_crs_code
+            return(crs_code)
+        else:
+            log.error(temp_crs_code)
+            raise GeographicTypeGeoKeyError()
+
+
+    def convert_to_wgs_84(self, crs_code: int, xxyy: Tuple[float, float]) -> Tuple[float, float]:
+        xx: float = xxyy[0]
+        yy: float = xxyy[1]
+        crs_4326: CRS = CRS("WGS84")
+        crs_proj: CRS = CRS.from_epsg(crs_code)
+        transformer: Transformer = Transformer.from_crs(
+            crs_proj, crs_4326, always_xy=True)
+        return(transformer.transform(xx, yy))
+
+
+    def convert_from_wgs_84(self, crs_code: int, xxyy: Tuple[float, float]) -> Tuple[float, float]:
+        xx: float = xxyy[0]
+        yy: float = xxyy[1]
+        crs_4326: CRS = CRS("WGS84")
+        crs_proj: CRS = CRS.from_epsg(crs_code)
+        transformer: Transformer = Transformer.from_crs(
+            crs_4326, crs_proj, always_xy=True)
+        return(transformer.transform(xx, yy))
+
+
+    def read_box(self, bBox: BBox) -> List[List[Union[int,float]]]:
+
+            
+            
         b_bBox: BBox = bBox
-        tif_bBox: BBox = (tifTrans.get_xy(0, 0), tifTrans.get_xy(tifShape[1], tifShape[0]))
-        b_bBox = (convert_from_wgs_84(crs_code, b_bBox[0]), convert_from_wgs_84(crs_code, b_bBox[0]))
+        tif_bBox: BBox = (self.tifTrans.get_xy(0, 0), self.tifTrans.get_xy(self.tifShape[1], self.tifShape[0]))
+        b_bBox = (self.convert_from_wgs_84(self.crs_code, b_bBox[0]), self.convert_from_wgs_84(self.crs_code, b_bBox[0]))
 
         def get_x_int(lon) -> int:
             step_x: float = float(
-                tifShape[1]/(tif_bBox[1][0] - tif_bBox[0][0]))
+                self.tifShape[1]/(tif_bBox[1][0] - tif_bBox[0][0]))
             return(int(step_x*(lon - tif_bBox[0][0])))
 
         def get_y_int(lat) -> int:
-            step_y: float = tifShape[0]/(tif_bBox[1][1] - tif_bBox[0][1])
+            step_y: float = self.tifShape[0]/(tif_bBox[1][1] - tif_bBox[0][1])
             return(int(step_y*(lat - tif_bBox[0][1])))
 
         x_min: int = get_x_int(b_bBox[0][0])
@@ -149,24 +160,29 @@ def read_box(input_file: str, bBox: BBox) -> List[List[Union[int,float]]]:
         y_min: int = get_y_int(b_bBox[0][1])
         y_max: int = get_y_int(b_bBox[1][1])
         # # TODO use this to make check
-        # shp_bBox = [stats.get_xy(x_min,y_min),  stats.get_xy(x_max+1,y_max+1)]
-        # log.debug(shp_bBox)
-        # log.debug(b_bBox)
-        # log.debug(shp_bBox[0][0] < b_bBox[0][0])
-        # log.debug(shp_bBox[1][0] > b_bBox[1][0])
-        # log.debug(shp_bBox[0][1] > b_bBox[0][1])
-        # log.debug(shp_bBox[1][1] < b_bBox[1][1])
+        shp_bBox = [self.tifTrans.get_xy(x_min,y_min),  self.tifTrans.get_xy(x_max+1,y_max+1)]
+        log.debug(shp_bBox)
+        log.debug(b_bBox)
+        check = (shp_bBox[0][0] < b_bBox[0][0])
+        check = check and (shp_bBox[1][0] > b_bBox[1][0])
+        check = check and (shp_bBox[0][1] > b_bBox[0][1])
+        check = check and (shp_bBox[1][1] < b_bBox[1][1])
+
+        if not check:
+            raise BoundaryNotInTifError()
+        else:
+            log.info("Boundary is in tiff")
         tif_poly: Polygon = Polygon([(tif_bBox[0][0], tif_bBox[0][1]), (tif_bBox[0][0], tif_bBox[1][1]),
                             (tif_bBox[1][0], tif_bBox[1][1]), (tif_bBox[1][0], tif_bBox[0][1])])
         b_poly: Polygon = Polygon([(b_bBox[0][0], b_bBox[0][1]), (b_bBox[0][0], b_bBox[1][1]),
-                          (b_bBox[1][0], b_bBox[1][1]), (b_bBox[1][0], b_bBox[0][1])])
+                        (b_bBox[1][0], b_bBox[1][1]), (b_bBox[1][0], b_bBox[0][1])])
         if not tif_poly.contains(b_poly):
             raise BoundaryNotInTifError()
-        store = imread(input_file, aszarr=True)
+        store = imread(self.file, aszarr=True)
         z = zarr.open(store, mode='r')
 
-        cut_tif_array = z[y_min:y_max, x_min:x_max]
+        cut_tif_array: List[List[Union[int,float]]] = z[y_min:y_max, x_min:x_max]
 
         store.close()
 
-    return(cut_tif_array)
+        return(cut_tif_array)
