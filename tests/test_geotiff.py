@@ -33,3 +33,8 @@ def test_read(tiff_file, bounding_box, geoTiff: GeoTiff):
 def test_int_box(bounding_box, geoTiff: GeoTiff):
     intBox = geoTiff.get_int_box(bounding_box)
     log.debug(intBox)
+    assert isinstance(intBox, tuple)
+    assert len(intBox) == 2
+    assert isinstance(intBox[0], tuple)
+    assert isinstance(intBox[1], tuple)
+    assert ((125, 143), (169, 178)) == intBox
