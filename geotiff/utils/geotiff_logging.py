@@ -1,7 +1,7 @@
 import logging
 from colorlog import ColoredFormatter # type: ignore
 
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.WARNING
 LOGFORMAT =   "(%(module)s) %(log_color)s%(levelname)s%(reset)s | %(log_color)s%(message)s%(reset)s"
 logging.root.setLevel(LOG_LEVEL)
 formatter = ColoredFormatter(LOGFORMAT)
