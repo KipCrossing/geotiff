@@ -37,7 +37,7 @@ class TifTransformer():
         #     transforms = transforms[0]
         self.transforms: List[List[List[float]]] = transforms
 
-    def get_x(self, i: int, j: int) -> List[float]:
+    def get_x(self, i: int, j: int) -> float:
         transformed: List[float] = np.dot(
             self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
@@ -45,7 +45,7 @@ class TifTransformer():
         log.debug(transformed_xy)
         return(transformed_xy[0])
 
-    def get_y(self, i: int, j: int) -> List[float]:
+    def get_y(self, i: int, j: int) -> float:
         transformed: List[float] = np.dot(
             self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
