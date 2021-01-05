@@ -157,7 +157,6 @@ class GeoTiff():
         x_max: int = get_x_int(b_bBox[1][0])
         y_min: int = get_y_int(b_bBox[0][1])
         y_max: int = get_y_int(b_bBox[1][1])
-        # # TODO use this to make check
         shp_bBox = [self.tifTrans.get_xy(x_min,y_min),  self.tifTrans.get_xy(x_max+1,y_max+1)]
         log.debug(shp_bBox)
         log.debug(b_bBox)
@@ -180,7 +179,5 @@ class GeoTiff():
         z = zarr.open(store, mode='r')
 
         cut_tif_array: List[List[Union[int,float]]] = z[y_min:y_max, x_min:x_max]
-
         store.close()
-
         return(cut_tif_array)
