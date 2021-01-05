@@ -140,11 +140,9 @@ class GeoTiff():
 
     def read_box(self, bBox: BBox) -> List[List[Union[int,float]]]:
 
-            
-            
         b_bBox: BBox = bBox
         tif_bBox: BBox = (self.tifTrans.get_xy(0, 0), self.tifTrans.get_xy(self.tifShape[1], self.tifShape[0]))
-        b_bBox = (self.convert_from_wgs_84(self.crs_code, b_bBox[0]), self.convert_from_wgs_84(self.crs_code, b_bBox[0]))
+        b_bBox = (self.convert_from_wgs_84(self.crs_code, b_bBox[0]), self.convert_from_wgs_84(self.crs_code, b_bBox[1]))
 
         def get_x_int(lon) -> int:
             step_x: float = float(
