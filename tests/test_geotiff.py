@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import os
 from geotiff.utils.geotiff_logging import log
-from geotiff.geotiff import read_box
+from geotiff import read_box
 
 @pytest.fixture
 def tiff_file():
