@@ -14,12 +14,22 @@ def tiff_file():
 def bounding_box():
     return([(138.632071411, -32.447310785), (138.644218874, -32.456979174)])
 
-def test_read(tiff_file, bounding_box):
+
+@pytest.fixture
+def geoTiff(tiff_file):
+    return(GeoTiff(tiff_file))
+
+def test_read(tiff_file, bounding_box, geoTiff: GeoTiff):
     log.info("testing read tiff")
     log.debug(f"reading: {tiff_file}")
     log.debug(f"Using bBox: {bounding_box}")
-    array = GeoTiff(tiff_file).read_box(bounding_box)
+    array = geoTiff.read_box(bounding_box)
     log.debug("Sample array:")
     log.debug(array)
     log.debug(array.shape)
     assert isinstance(array, np.ndarray)
+
+
+def test_int_box(bounding_box, geoTiff: GeoTiff):
+    intBox = geoTiff.get_int_box(bounding_box)
+    log.debug(intBox)
