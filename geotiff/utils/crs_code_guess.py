@@ -6,7 +6,7 @@ from .geotiff_logging import log
 PreDict = List[Tuple[str, int]]
 
 
-def crs_code_gusser(GTCitationGeo: str) -> Tuple[int, int]:
+def crs_code_gusser(GTCitationGeo: str) -> Tuple[int, float]:
     """This is a very hacky solution to the problem of finding the correct 
     crs code based on the GTCitationGeoKey string.
 
@@ -14,7 +14,7 @@ def crs_code_gusser(GTCitationGeo: str) -> Tuple[int, int]:
         GTCitationGeo (str): GT Citation Geo Key
 
     Returns:
-        Tuple[int, int]: ([The crs code], [the score of the guess from 0 to 1])
+        Tuple[int, float]: ([The crs code], [the score of the guess from 0 to 1])
     """
     log.warning(
         "Making a guess for the crs_code based on the GTCitationGeoKey. Could be incorrect!")
