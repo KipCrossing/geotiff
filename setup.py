@@ -3,7 +3,7 @@ import os
 import sys
 from setuptools.command.install import install
 
-VERSION = "0.0.10"
+VERSION = "0.0.11"
 
 # Send to pypi
 # python3 setup.py sdist bdist_wheel
@@ -37,7 +37,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Open-Source-Agriculture/geotiff",
-    packages=['geotiff'],
+    packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
