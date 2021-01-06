@@ -59,8 +59,6 @@ class TifTransformer():
         transformed: List[float] = np.dot(
             self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
-        log.debug("transformed_xy")
-        log.debug(transformed_xy)
         return(transformed_xy[0])
 
     def get_y(self, i: int, j: int) -> float:
@@ -76,8 +74,6 @@ class TifTransformer():
         transformed: List[float] = np.dot(
             self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
-        log.debug("transformed_xy")
-        log.debug(transformed_xy)
         return(transformed_xy[1])
 
     def get_xy(self, i: int, j: int) -> Tuple[float, float]:
@@ -93,8 +89,6 @@ class TifTransformer():
         transformed: List[float] = np.dot(
             self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
-        log.debug("transformed_xy")
-        log.debug(transformed_xy)
         return(transformed_xy[0], transformed_xy[1])
 
 
@@ -221,7 +215,7 @@ class GeoTiff():
         return(((x_min,y_min),(x_max,y_max)))
 
 
-    def read(self) -> List[List[Union[int,float]]]:
+    def read(self) -> np.asarray:
         """Reade the contents of the geotiff to a zarr array
 
         Returns:
