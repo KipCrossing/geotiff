@@ -34,5 +34,5 @@ This will detect and convert coordinates into WGS 84
 
 - [ ] **(50%)** Full test coverage
 - [x] Typing with lint checking using mypy
-- [x] Documentation: doc blocs and readthedocs
+- [x] Documentation: doc blocs
 - [ ] Documentation: readthedocs
