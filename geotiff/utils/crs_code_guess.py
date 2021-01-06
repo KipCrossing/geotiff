@@ -27,6 +27,7 @@ def crs_code_gusser(GTCitationGeo: str) -> Tuple[int, float]:
                      for name, member in GCSE.__members__.items()]
     gcs: PreDict = [(name, member.value)
                     for name, member in GCS.__members__.items()]
+    # TODO
     # ! handel these!
     ellipse: PreDict = [(name, member.value)
                         for name, member in Ellipse.__members__.items()]
