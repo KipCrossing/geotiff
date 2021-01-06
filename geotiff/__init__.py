@@ -1,9 +1,8 @@
+from geotiff.utils.crs_code_guess import crs_code_gusser
 from typing import List, Optional, Tuple, Union
 from shapely.geometry import Point, Polygon  # type: ignore
 from tifffile import imread, TiffFile  # type: ignore
 import numpy as np  # type: ignore
-from tifffile.tifffile_geodb import Proj, GCSE, PCS, GCS, Ellipse, DatumE, Datum  # type: ignore
-from difflib import SequenceMatcher
 from pyproj import Transformer, CRS
 import zarr  # type: ignore
 from .utils.geotiff_logging import log  # type: ignore
@@ -19,6 +18,8 @@ class GeographicTypeGeoKeyError(Exception):
 class BoundaryNotInTifError(Exception):
     pass
 
+class FileTypeError(Exception):
+    pass
 
 class TifTransformer():
     def __init__(self,  height: int, width: int, scale: Tuple[float, float, float], tiepoints: List[float]):
@@ -65,7 +66,15 @@ class TifTransformer():
 
 
 class GeoTiff():
-    def __init__(self, file):
+    def __init__(self, file: str):
+        """For representing a geotiff
+
+        Args:
+            file (str): Location of the geoTiff file
+
+        Raises:
+            FileTypeError: [description]
+        """
         self.file = file
         tif = TiffFile(self.file)
 
@@ -82,23 +91,6 @@ class GeoTiff():
 
 
     def get_crs_code(self, geotiff_metadata: dict, guess: bool = True) -> int:
-        PreDict = List[Tuple[str, int]]
-        projs: PreDict = [(name, member.value)
-                        for name, member in Proj.__members__.items()]
-        pcss: PreDict = [(name, member.value)
-                        for name, member in PCS.__members__.items()]
-        gcse: PreDict = [(name, member.value)
-                        for name, member in GCSE.__members__.items()]
-        gcs: PreDict = [(name, member.value)
-                        for name, member in GCS.__members__.items()]
-        # ! handel these!
-        ellipse: PreDict = [(name, member.value)
-                            for name, member in Ellipse.__members__.items()]
-        datumE: PreDict = [(name, member.value)
-                        for name, member in DatumE.__members__.items()]
-        datum: PreDict = [(name, member.value)
-                        for name, member in Datum.__members__.items()]
-        all_crs = dict(projs + pcss + gcse + gcs)  # + ellipse + datumE + datum)
         temp_crs_code: int = 32767
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
             log.info("PROJECTED")
@@ -109,21 +101,16 @@ class GeoTiff():
 
         log.info(temp_crs_code)
         if temp_crs_code == 32767 and guess:
-            # takes a guess based on the GTCitationGeoKey
-            info_str: str = str(geotiff_metadata["GTCitationGeoKey"])
-            best_score: float = 0.0
-            crs_key: str = ""
-            for crs in all_crs.keys():
-                score: float = SequenceMatcher(None, info_str, str(crs)).ratio()
-                if score > best_score:
-                    best_score = score
-                    crs_key = crs
-            if best_score < 0.4:
+            GTCitationGeo: str = str(geotiff_metadata["GTCitationGeoKey"])
+            crs_code, score = crs_code_gusser(GTCitationGeo)
+
+            if score < 0.4:
                 raise GeographicTypeGeoKeyError()
-            crs_code = all_crs[crs_key]
-            return(crs_code)
-        elif temp_crs_code in all_crs.values():
+        else:
             crs_code = temp_crs_code
+            return(crs_code)
+
+        if crs_code != 32767:
             return(crs_code)
         else:
             log.error(temp_crs_code)
