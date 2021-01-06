@@ -23,6 +23,14 @@ class FileTypeError(Exception):
 
 class TifTransformer():
     def __init__(self,  height: int, width: int, scale: Tuple[float, float, float], tiepoints: List[float]):
+        """for transforming the coordinates of the geotiff file
+
+        Args:
+            height (int): Hight (y) of the geotiff array/file
+            width (int): Width of the geotiff array/file
+            scale (Tuple[float, float, float]): (sx, sy, sz) from ModelPixelScaleTag
+            tiepoints (List[float]): [description]
+        """
         self.width: int = width
         self.height: int = height
         sx, sy, sz = scale  # ModelPixelScaleTag
@@ -39,6 +47,15 @@ class TifTransformer():
         self.transforms: List[List[List[float]]] = transforms
 
     def get_x(self, i: int, j: int) -> float:
+        """Gets the x or lon coordinate based on the array index
+
+        Args:
+            i (int): index in the x direction
+            j (int): index in the y direction
+
+        Returns:
+            float: x or lon coordinate
+        """
         transformed: List[float] = np.dot(
             self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
@@ -47,6 +64,15 @@ class TifTransformer():
         return(transformed_xy[0])
 
     def get_y(self, i: int, j: int) -> float:
+        """Gets the y or lat coordinate based on the array index
+
+        Args:
+            i (int): index in the x direction
+            j (int): index in the y direction
+
+        Returns:
+            float: y or lat coordinate
+        """
         transformed: List[float] = np.dot(
             self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
@@ -55,6 +81,15 @@ class TifTransformer():
         return(transformed_xy[1])
 
     def get_xy(self, i: int, j: int) -> Tuple[float, float]:
+        """Gets the (x or lon) and (y or lat) coordinates based on the array index
+
+        Args:
+            i (int): index in the x direction
+            j (int): index in the y direction
+
+        Returns:
+            Tuple[float, float]: (x or lon) and (y or lat) coordinates
+        """
         transformed: List[float] = np.dot(
             self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
@@ -81,7 +116,7 @@ class GeoTiff():
         if not tif.is_geotiff:
             raise Exception("Not a geotiff file")
 
-        self.crs_code: int = self.get_crs_code(tif.geotiff_metadata)
+        self.crs_code: int = self._get_crs_code(tif.geotiff_metadata)
         self.tifShape: List[int] = tif.asarray().shape
         scale: Tuple[float, float, float] = tif.geotiff_metadata['ModelPixelScale']
         tilePoint: List[float] = tif.geotiff_metadata['ModelTiepoint']
@@ -90,7 +125,7 @@ class GeoTiff():
         
 
 
-    def get_crs_code(self, geotiff_metadata: dict, guess: bool = True) -> int:
+    def _get_crs_code(self, geotiff_metadata: dict, guess: bool = True) -> int:
         temp_crs_code: int = 32767
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
             log.info("PROJECTED")
@@ -117,7 +152,7 @@ class GeoTiff():
             raise GeographicTypeGeoKeyError()
 
 
-    def convert_to_wgs_84(self, crs_code: int, xxyy: Tuple[float, float]) -> Tuple[float, float]:
+    def _convert_to_wgs_84(self, crs_code: int, xxyy: Tuple[float, float]) -> Tuple[float, float]:
         xx: float = xxyy[0]
         yy: float = xxyy[1]
         crs_4326: CRS = CRS("WGS84")
@@ -127,7 +162,7 @@ class GeoTiff():
         return(transformer.transform(xx, yy))
 
 
-    def convert_from_wgs_84(self, crs_code: int, xxyy: Tuple[float, float]) -> Tuple[float, float]:
+    def _convert_from_wgs_84(self, crs_code: int, xxyy: Tuple[float, float]) -> Tuple[float, float]:
         xx: float = xxyy[0]
         yy: float = xxyy[1]
         crs_4326: CRS = CRS("WGS84")
@@ -146,7 +181,19 @@ class GeoTiff():
         return(int(step_y*(lat - self.tif_bBox[0][1])))
 
     def get_int_box(self, bBox: BBox) -> BBoxInt:
-        b_bBox = (self.convert_from_wgs_84(self.crs_code, bBox[0]), self.convert_from_wgs_84(self.crs_code, bBox[1]))
+        """Gets the intiger array index values based on a bounding box
+
+        Args:
+            bBox (BBox): A bounding box
+
+        Raises:
+            BoundaryNotInTifError: If the boundary is not enclosed withing the 
+                                    outer cooridinated of the tiff
+
+        Returns:
+            BBoxInt: array index values
+        """
+        b_bBox = (self._convert_from_wgs_84(self.crs_code, bBox[0]), self._convert_from_wgs_84(self.crs_code, bBox[1]))
         x_min: int = self._get_x_int(b_bBox[0][0])
         y_min: int = self._get_y_int(b_bBox[0][1])
         x_max: int = self._get_x_int(b_bBox[1][0])
@@ -174,10 +221,19 @@ class GeoTiff():
         return(((x_min,y_min),(x_max,y_max)))
 
 
-    def read_box(self, bBox: BBox) -> List[List[Union[int,float]]]:
-        ((x_min,y_min),(x_max,y_max)) = self.get_int_box(bBox)
+    def read(self) -> List[List[Union[int,float]]]:
+        """Reade the contents of the geotiff to a zarr array
+
+        Returns:
+            List[List[Union[int,float]]]: zarr array of the geotiff file
+        """
         store = imread(self.file, aszarr=True)
         z = zarr.open(store, mode='r')
-        cut_tif_array: List[List[Union[int,float]]] = z[y_min:y_max, x_min:x_max]
         store.close()
+        return(z)
+
+    def read_box(self, bBox: BBox) -> List[List[Union[int,float]]]:
+        ((x_min,y_min),(x_max,y_max)) = self.get_int_box(bBox)
+        tiff_array = self.read()
+        cut_tif_array: List[List[Union[int,float]]] = tiff_array[y_min:y_max, x_min:x_max]
         return(cut_tif_array)
