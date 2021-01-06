@@ -1,4 +1,4 @@
-from geotiff.utils.crs_code_guess import crs_code_gusser
+from .utils.crs_code_guess import crs_code_gusser
 from typing import List, Optional, Tuple, Union
 from shapely.geometry import Point, Polygon  # type: ignore
 from tifffile import imread, TiffFile  # type: ignore
