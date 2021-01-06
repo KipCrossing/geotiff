@@ -1,3 +1,6 @@
+# Geotiff
+geotiff_logging.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
