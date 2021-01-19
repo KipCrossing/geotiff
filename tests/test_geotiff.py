@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 import os
-from geotiff.utils.geotiff_logging import log
 from geotiff import GeoTiff
 
 @pytest.fixture
@@ -20,19 +19,18 @@ def geoTiff(tiff_file):
     return(GeoTiff(tiff_file))
 
 def test_read(tiff_file, bounding_box, geoTiff: GeoTiff):
-    log.info("testing read tiff")
-    log.debug(f"reading: {tiff_file}")
-    log.debug(f"Using bBox: {bounding_box}")
+    print("testing read tiff")
+    print(f"reading: {tiff_file}")
+    print(f"Using bBox: {bounding_box}")
     array = geoTiff.read_box(bounding_box)
-    log.debug("Sample array:")
-    log.debug(array)
-    log.debug(array.shape)
+    print("Sample array:")
+    print(array)
+    print(array.shape)
     assert isinstance(array, np.ndarray)
 
 
 def test_int_box(bounding_box, geoTiff: GeoTiff):
     intBox = geoTiff.get_int_box(bounding_box)
-    log.debug(intBox)
     assert isinstance(intBox, tuple)
     assert len(intBox) == 2
     assert isinstance(intBox[0], tuple)

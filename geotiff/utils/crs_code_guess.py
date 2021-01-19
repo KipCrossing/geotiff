@@ -1,7 +1,6 @@
 from tifffile.tifffile_geodb import Proj, GCSE, PCS, GCS, Ellipse, DatumE, Datum  # type: ignore
 from typing import List, Tuple
 from difflib import SequenceMatcher
-from .geotiff_logging import log
 
 PreDict = List[Tuple[str, int]]
 
@@ -16,8 +15,6 @@ def crs_code_gusser(GTCitationGeo: str) -> Tuple[int, float]:
     Returns:
         Tuple[int, float]: ([The crs code], [the score of the guess from 0 to 1])
     """
-    log.warning(
-        "Making a guess for the crs_code based on the GTCitationGeoKey. Could be incorrect!")
     crs_code: int = 32767
     projs: PreDict = [(name, member.value)
                       for name, member in Proj.__members__.items()]

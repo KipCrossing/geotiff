@@ -5,14 +5,13 @@ from tifffile import imread, TiffFile  # type: ignore
 import numpy as np  # type: ignore
 from pyproj import Transformer, CRS
 import zarr  # type: ignore
-from .utils.geotiff_logging import log  # type: ignore
 
 BBox = Tuple[Tuple[float,float], Tuple[float,float]]
 BBoxInt = Tuple[Tuple[int,int], Tuple[int,int]]
 
 class GeographicTypeGeoKeyError(Exception):
     def __init__(_):
-        log.error("We could not recognize the geo key\nPlease submit an issue: \
+        _.__str__("We could not recognize the geo key\nPlease submit an issue: \
                 https://github.com/Open-Source-Agriculture/geotiff/issues")
 
 class BoundaryNotInTifError(Exception):
@@ -122,13 +121,10 @@ class GeoTiff():
     def _get_crs_code(self, geotiff_metadata: dict, guess: bool = True) -> int:
         temp_crs_code: int = 32767
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
-            log.info("PROJECTED")
             temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
         elif geotiff_metadata["GTModelTypeGeoKey"].value == 2:
-            log.info("GEO")
             temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
 
-        log.info(temp_crs_code)
         if temp_crs_code == 32767 and guess:
             GTCitationGeo: str = str(geotiff_metadata["GTCitationGeoKey"])
             crs_code, score = crs_code_gusser(GTCitationGeo)
@@ -142,7 +138,6 @@ class GeoTiff():
         if crs_code != 32767:
             return(crs_code)
         else:
-            log.error(temp_crs_code)
             raise GeographicTypeGeoKeyError()
 
 
@@ -194,8 +189,6 @@ class GeoTiff():
         y_max: int = self._get_y_int(b_bBox[1][1])
 
         shp_bBox = [self.tifTrans.get_xy(x_min,y_min),  self.tifTrans.get_xy(x_max+1,y_max+1)]
-        log.debug(shp_bBox)
-        log.debug(b_bBox)
         check = (shp_bBox[0][0] < b_bBox[0][0])
         check = check and (shp_bBox[1][0] > b_bBox[1][0])
         check = check and (shp_bBox[0][1] > b_bBox[0][1])
@@ -203,8 +196,6 @@ class GeoTiff():
 
         if not check:
             raise BoundaryNotInTifError()
-        else:
-            log.info("Boundary is in tiff")
         tif_poly: Polygon = Polygon([(self.tif_bBox[0][0], self.tif_bBox[0][1]), (self.tif_bBox[0][0], self.tif_bBox[1][1]),
                             (self.tif_bBox[1][0], self.tif_bBox[1][1]), (self.tif_bBox[1][0], self.tif_bBox[0][1])])
         b_poly: Polygon = Polygon([(b_bBox[0][0], b_bBox[0][1]), (b_bBox[0][0], b_bBox[1][1]),
