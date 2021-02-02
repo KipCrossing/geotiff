@@ -3,7 +3,7 @@ import os
 import sys
 from setuptools.command.install import install
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 # Send to pypi
 # python3 setup.py sdist bdist_wheel
@@ -44,6 +44,13 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    install_requires=[
+        'shapely',
+        'tifffile',
+        'numpy',
+        'pyproj',
+        'zarr',
+    ],
     cmdclass={
         'verify': VerifyVersionCommand,
     }
