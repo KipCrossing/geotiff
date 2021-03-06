@@ -111,8 +111,12 @@ class GeoTiff():
         if not tif.is_geotiff:
             raise Exception("Not a geotiff file")
 
+        store = imread(self.file, aszarr=True)
+        self.z = zarr.open(store, mode='r')
+        store.close()
+
         self.crs_code: int = self._get_crs_code(tif.geotiff_metadata)
-        self.tifShape: List[int] = tif.asarray().shape
+        self.tifShape: List[int] = self.z.shape
         scale: Tuple[float, float, float] = tif.geotiff_metadata['ModelPixelScale']
         tilePoint: List[float] = tif.geotiff_metadata['ModelTiepoint']
         self.tifTrans: TifTransformer = TifTransformer(self.tifShape[0], self.tifShape[1], scale, tilePoint)
@@ -214,10 +218,7 @@ class GeoTiff():
         Returns:
             List[List[Union[int,float]]]: zarr array of the geotiff file
         """
-        store = imread(self.file, aszarr=True)
-        z = zarr.open(store, mode='r')
-        store.close()
-        return(z)
+        return(self.z)
 
     def read_box(self, bBox: BBox) -> np.ndarray:
         ((x_min,y_min),(x_max,y_max)) = self.get_int_box(bBox)
