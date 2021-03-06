@@ -13,7 +13,9 @@ BBoxInt = Tuple[Tuple[int,int], Tuple[int,int]]
 
 class GeographicTypeGeoKeyError(Exception):
     def __init__(_):
-        _.__str__("We could not recognize the geo key\nPlease submit an issue: \
+        pass
+    def __str__(_):
+        return("We could not recognize the geo key\nPlease submit an issue: \
                 https://github.com/Open-Source-Agriculture/geotiff/issues")
 
 class BoundaryNotInTifError(Exception):
