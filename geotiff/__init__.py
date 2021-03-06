@@ -208,7 +208,7 @@ class GeoTiff():
         return(((x_min,y_min),(x_max,y_max)))
 
 
-    def read(self) -> np.asarray:
+    def read(self) -> np.ndarray:
         """Reade the contents of the geotiff to a zarr array
 
         Returns:
@@ -219,7 +219,7 @@ class GeoTiff():
         store.close()
         return(z)
 
-    def read_box(self, bBox: BBox) -> np.ndarray[List[Union[int,float]]]:
+    def read_box(self, bBox: BBox) -> np.ndarray[np.ndarray[Union[int,float]]]:
         ((x_min,y_min),(x_max,y_max)) = self.get_int_box(bBox)
         tiff_array = self.read()
         cut_tif_array: np.ndarray[np.ndarray[Union[int,float]]] = tiff_array[y_min:y_max, x_min:x_max]
