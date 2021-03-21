@@ -1,4 +1,3 @@
-from .utils.crs_code_guess import crs_code_gusser
 from typing import List, Optional, Tuple, Union
 from shapely.geometry import Point, Polygon  # type: ignore
 from tifffile import imread, TiffFile  # type: ignore
@@ -130,21 +129,14 @@ class GeoTiff():
         temp_crs_code: int = 32767
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
             temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
+            # TODO 
+            # if the ProjectedCSTypeGeoKey is user defined (32767)
+            # use supplied keys to get the datum and define the CRS
         elif geotiff_metadata["GTModelTypeGeoKey"].value == 2:
             temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
 
-        if temp_crs_code == 32767 and guess:
-            GTCitationGeo: str = str(geotiff_metadata["GTCitationGeoKey"])
-            crs_code, score = crs_code_gusser(GTCitationGeo)
-
-            if score < 0.4:
-                raise GeographicTypeGeoKeyError()
-        else:
-            crs_code = temp_crs_code
-            return(crs_code)
-
-        if crs_code != 32767:
-            return(crs_code)
+        if temp_crs_code != 32767:
+            return(temp_crs_code)
         else:
             raise GeographicTypeGeoKeyError()
 
