@@ -1,4 +1,3 @@
-from .utils.crs_code_guess import crs_code_gusser
 from typing import List, Optional, Tuple, Union
 from shapely.geometry import Point, Polygon  # type: ignore
 from tifffile import imread, TiffFile  # type: ignore
@@ -6,12 +5,16 @@ import numpy as np  # type: ignore
 from pyproj import Transformer, CRS
 import zarr  # type: ignore
 
+
+
 BBox = Tuple[Tuple[float,float], Tuple[float,float]]
 BBoxInt = Tuple[Tuple[int,int], Tuple[int,int]]
 
 class GeographicTypeGeoKeyError(Exception):
     def __init__(_):
-        _.__str__("We could not recognize the geo key\nPlease submit an issue: \
+        pass
+    def __str__(_):
+        return("We could not recognize the geo key\nPlease submit an issue: \
                 https://github.com/Open-Source-Agriculture/geotiff/issues")
 
 class BoundaryNotInTifError(Exception):
@@ -109,8 +112,12 @@ class GeoTiff():
         if not tif.is_geotiff:
             raise Exception("Not a geotiff file")
 
+        store = imread(self.file, aszarr=True)
+        self.z = zarr.open(store, mode='r')
+        store.close()
+
         self.crs_code: int = self._get_crs_code(tif.geotiff_metadata)
-        self.tifShape: List[int] = tif.asarray().shape
+        self.tifShape: List[int] = self.z.shape
         scale: Tuple[float, float, float] = tif.geotiff_metadata['ModelPixelScale']
         tilePoint: List[float] = tif.geotiff_metadata['ModelTiepoint']
         self.tifTrans: TifTransformer = TifTransformer(self.tifShape[0], self.tifShape[1], scale, tilePoint)
@@ -122,21 +129,14 @@ class GeoTiff():
         temp_crs_code: int = 32767
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
             temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
+            # TODO 
+            # if the ProjectedCSTypeGeoKey is user defined (32767)
+            # use supplied keys to get the datum and define the CRS
         elif geotiff_metadata["GTModelTypeGeoKey"].value == 2:
             temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
 
-        if temp_crs_code == 32767 and guess:
-            GTCitationGeo: str = str(geotiff_metadata["GTCitationGeoKey"])
-            crs_code, score = crs_code_gusser(GTCitationGeo)
-
-            if score < 0.4:
-                raise GeographicTypeGeoKeyError()
-        else:
-            crs_code = temp_crs_code
-            return(crs_code)
-
-        if crs_code != 32767:
-            return(crs_code)
+        if temp_crs_code != 32767:
+            return(temp_crs_code)
         else:
             raise GeographicTypeGeoKeyError()
 
@@ -206,19 +206,16 @@ class GeoTiff():
         return(((x_min,y_min),(x_max,y_max)))
 
 
-    def read(self) -> np.asarray:
+    def read(self) -> np.ndarray:
         """Reade the contents of the geotiff to a zarr array
 
         Returns:
             List[List[Union[int,float]]]: zarr array of the geotiff file
         """
-        store = imread(self.file, aszarr=True)
-        z = zarr.open(store, mode='r')
-        store.close()
-        return(z)
+        return(self.z)
 
-    def read_box(self, bBox: BBox) -> List[List[Union[int,float]]]:
+    def read_box(self, bBox: BBox) -> np.ndarray:
         ((x_min,y_min),(x_max,y_max)) = self.get_int_box(bBox)
         tiff_array = self.read()
-        cut_tif_array: List[List[Union[int,float]]] = tiff_array[y_min:y_max, x_min:x_max]
+        cut_tif_array: np.ndarray = tiff_array[y_min:y_max, x_min:x_max]
         return(cut_tif_array)
