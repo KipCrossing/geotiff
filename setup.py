@@ -3,7 +3,7 @@ import os
 import sys
 from setuptools.command.install import install
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 # Send to pypi
 # python3 setup.py sdist bdist_wheel
@@ -43,9 +43,9 @@ setuptools.setup(
         "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=[
-        'shapely',
+      imagecodecs  'shapely',
         'tifffile',
         'numpy',
         'pyproj',
