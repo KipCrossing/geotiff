@@ -2,6 +2,8 @@
 
 A noGDAL tool for reading and writing geotiff files
 
+WARNING this package is under development and some features are unstable. Use with caution. 
+
 ### What is noGDAL?
 
 **[noGDAL](https://kipcrossing.github.io/2021-01-03-noGDAL/)** is a philosophy for developing geospatial programs in python without using GDAL.
