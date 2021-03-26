@@ -14,8 +14,15 @@ class GeographicTypeGeoKeyError(Exception):
     def __init__(_):
         pass
     def __str__(_):
-        return("We could not recognize the geo key\nPlease submit an issue: \
+        return("Could not recognize the geo key\nPlease submit an issue: \
                 https://github.com/Open-Source-Agriculture/geotiff/issues")
+
+
+class UserDefinedGeoKeyError(Exception):
+    def __init__(_):
+        pass
+    def __str__(_):
+        return("user-defined GeoKeys are not yet supported")
 
 class BoundaryNotInTifError(Exception):
     pass
@@ -126,7 +133,7 @@ class GeoTiff():
 
 
     def _get_crs_code(self, geotiff_metadata: dict, guess: bool = True) -> int:
-        temp_crs_code: int = 32767
+        temp_crs_code: Optional[int] = None
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
             temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
             # TODO 
@@ -135,8 +142,10 @@ class GeoTiff():
         elif geotiff_metadata["GTModelTypeGeoKey"].value == 2:
             temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
 
-        if temp_crs_code != 32767:
+        if temp_crs_code != 32767 and temp_crs_code !=None:
             return(temp_crs_code)
+        elif temp_crs_code == 32767:
+            raise UserDefinedGeoKeyError()        
         else:
             raise GeographicTypeGeoKeyError()
 
