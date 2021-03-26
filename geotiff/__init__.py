@@ -142,8 +142,7 @@ class GeoTiff():
         elif geotiff_metadata["GTModelTypeGeoKey"].value == 2:
             temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
 
-        if temp_crs_code != 32767 and temp_crs_code !=None:
-            assert isinstance(temp_crs_code, int)
+        if temp_crs_code != 32767 and isinstance(temp_crs_code, int):
             return(temp_crs_code)
         elif temp_crs_code == 32767:
             raise UserDefinedGeoKeyError()        
