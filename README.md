@@ -27,17 +27,29 @@ geoTiff = GeoTiff(tiff_file)
 array = geoTiff.read()
 ```
 
-Read a sections of a large tiff using a bounding box
+Read a sections of a large tiff using a WGS 84 area
 
 ```python
 from geotiff import GeoTiff
 
-bounding_box = [(138.632071411, -32.447310785), (138.644218874, -32.456979174)]
-geoTiff = GeoTiff(tiff_file)
-array = geoTiff.read_box(bounding_box)
+area_box = [(138.632071411, -32.447310785), (138.644218874, -32.456979174)]
+geotiff = GeoTiff(tiff_file)
+array = geotiff.read_box(area_box)
 ```
 
 This will detect and convert coordinates into WGS 84
+
+You can also get the coordinated of the actual bounding box
+
+```python
+geotiff.tif_bBox
+```
+
+And the original crs code
+
+```python
+geotiff.crs_code
+```
 
 ### Contributing
 
@@ -57,7 +69,8 @@ To help users and and other contributes, be sure to:
 
 - [x] read tiff files (including BigTiff)
 - [ ] write tiff files (including BigTiff)
-- [ ] **(UNSTABLE/LIMITED)** convert between coordinate systems
+- [x] **(UNSTABLE/LIMITED)** convert between coordinate systems
+- [ ] read a user defined CRS
 - [x] cut a section (bounding box) of the tiff file
 - [x] convert the data to numpy arrays
 

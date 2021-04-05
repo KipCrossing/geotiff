@@ -14,8 +14,15 @@ class GeographicTypeGeoKeyError(Exception):
     def __init__(_):
         pass
     def __str__(_):
-        return("We could not recognize the geo key\nPlease submit an issue: \
+        return("Could not recognize the geo key\nPlease submit an issue: \
                 https://github.com/Open-Source-Agriculture/geotiff/issues")
+
+
+class UserDefinedGeoKeyError(Exception):
+    def __init__(_):
+        pass
+    def __str__(_):
+        return("user-defined GeoKeys are not yet supported")
 
 class BoundaryNotInTifError(Exception):
     pass
@@ -122,11 +129,11 @@ class GeoTiff():
         tilePoint: List[float] = tif.geotiff_metadata['ModelTiepoint']
         self.tifTrans: TifTransformer = TifTransformer(self.tifShape[0], self.tifShape[1], scale, tilePoint)
         self.tif_bBox: BBox = (self.tifTrans.get_xy(0, 0), self.tifTrans.get_xy(self.tifShape[1], self.tifShape[0]))
-        
+        tif.close()
 
 
     def _get_crs_code(self, geotiff_metadata: dict, guess: bool = True) -> int:
-        temp_crs_code: int = 32767
+        temp_crs_code: Optional[int] = None
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
             temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
             # TODO 
@@ -135,8 +142,10 @@ class GeoTiff():
         elif geotiff_metadata["GTModelTypeGeoKey"].value == 2:
             temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
 
-        if temp_crs_code != 32767:
+        if temp_crs_code != 32767 and isinstance(temp_crs_code, int):
             return(temp_crs_code)
+        elif temp_crs_code == 32767:
+            raise UserDefinedGeoKeyError()        
         else:
             raise GeographicTypeGeoKeyError()
 
