@@ -129,7 +129,7 @@ class GeoTiff():
         tilePoint: List[float] = tif.geotiff_metadata['ModelTiepoint']
         self.tifTrans: TifTransformer = TifTransformer(self.tifShape[0], self.tifShape[1], scale, tilePoint)
         self.tif_bBox: BBox = (self.tifTrans.get_xy(0, 0), self.tifTrans.get_xy(self.tifShape[1], self.tifShape[0]))
-        
+        tif.close()
 
 
     def _get_crs_code(self, geotiff_metadata: dict, guess: bool = True) -> int:
