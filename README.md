@@ -69,7 +69,8 @@ To help users and and other contributes, be sure to:
 
 - [x] read tiff files (including BigTiff)
 - [ ] write tiff files (including BigTiff)
-- [ ] **(UNSTABLE/LIMITED)** convert between coordinate systems
+- [x] **(UNSTABLE/LIMITED)** convert between coordinate systems
+- [ ] read a user defined CRS
 - [x] cut a section (bounding box) of the tiff file
 - [x] convert the data to numpy arrays
 
