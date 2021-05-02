@@ -36,3 +36,14 @@ def test_int_box(bounding_box, geoTiff: GeoTiff):
     assert isinstance(intBox[0], tuple)
     assert isinstance(intBox[1], tuple)
     assert ((125, 143), (169, 178)) == intBox
+
+
+def test_conversions(bounding_box, geoTiff: GeoTiff):
+    b = geoTiff.get_int_box(bounding_box)
+    print(bounding_box)
+
+    print(geoTiff.get_bBox_wgs_84(bounding_box))
+    geoTiff.get_wgs_84_coords(b[0][0], b[0][1])
+    geoTiff.get_wgs_84_coords(b[1][0], b[1][1])
+    # print(geoTiff.read_box(bounding_box).shape)
+    # print(geoTiff.tif_bBox_wgs_84)
