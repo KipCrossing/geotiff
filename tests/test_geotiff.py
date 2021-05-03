@@ -42,12 +42,12 @@ def test_int_box(area_box, geoTiff: GeoTiff):
 
 
 def test_conversions(area_box, geoTiff: GeoTiff):
-    b = geoTiff.get_int_box(area_box)
-    geoTiff.get_wgs_84_coords(b[0][0], b[0][1])
-    geoTiff.get_wgs_84_coords(b[1][0], b[1][1])
-
+    int_box = geoTiff.get_int_box(area_box)
+    geoTiff.get_bBox_wgs_84(area_box)
+    i=int_box[0][0] + 5
+    j=int_box[0][1] + 6
+    geoTiff.get_wgs_84_coords(i, j)
     print(area_box)
-
     bounding_box = geoTiff.get_bBox_wgs_84(area_box)
     assert area_box[0][0] <= bounding_box[0][0]
     assert area_box[0][1] >= bounding_box[0][1]
