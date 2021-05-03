@@ -3,11 +3,13 @@ import pytest
 import os
 from geotiff import GeoTiff
 
+
 @pytest.fixture
 def tiff_file():
     filename = "dem.tif"
     dir = dir = "./tests/inputs/"
     return(os.path.join(dir, filename))
+
 
 @pytest.fixture
 def area_box():
@@ -17,6 +19,7 @@ def area_box():
 @pytest.fixture
 def geoTiff(tiff_file):
     return(GeoTiff(tiff_file))
+
 
 def test_read(tiff_file, area_box, geoTiff: GeoTiff):
     print("testing read tiff")
@@ -42,9 +45,7 @@ def test_conversions(area_box, geoTiff: GeoTiff):
     b = geoTiff.get_int_box(area_box)
     geoTiff.get_wgs_84_coords(b[0][0], b[0][1])
     geoTiff.get_wgs_84_coords(b[1][0], b[1][1])
-    
-    
-    
+
     print(area_box)
 
     bounding_box = geoTiff.get_bBox_wgs_84(area_box)
@@ -53,6 +54,6 @@ def test_conversions(area_box, geoTiff: GeoTiff):
     assert area_box[1][0] >= bounding_box[1][0]
     assert area_box[1][1] <= bounding_box[1][1]
 
-    # TODO add asserts for comapring the bBox's
-    # print(geoTiff.read_box(area_box).shape)
-    # print(geoTiff.tif_bBox_wgs_84)
+    print(geoTiff.read_box(area_box).shape)
+    assert geoTiff.tif_bBox_wgs_84 == (
+        (138.5972222222219, -32.40749999999997), (138.69055555555522, -32.49138888888886))
