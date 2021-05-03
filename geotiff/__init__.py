@@ -214,16 +214,16 @@ class GeoTiff():
             BBoxInt: array index values
         """
         b_bBox = (self._convert_from_wgs_84(self.crs_code, bBox[0]), self._convert_from_wgs_84(self.crs_code, bBox[1]))
-        x_min: int = self._get_x_int(b_bBox[0][0])
-        y_min: int = self._get_y_int(b_bBox[0][1])
+        x_min: int = self._get_x_int(b_bBox[0][0]) + int(not self.tif_bBox[0][0]==b_bBox[0][0])
+        y_min: int = self._get_y_int(b_bBox[0][1]) + int(not self.tif_bBox[0][1]==b_bBox[0][1])
         x_max: int = self._get_x_int(b_bBox[1][0])
         y_max: int = self._get_y_int(b_bBox[1][1])
 
-        shp_bBox = [self.tifTrans.get_xy(x_min,y_min),  self.tifTrans.get_xy(x_max+1,y_max+1)]
-        check = (shp_bBox[0][0] < b_bBox[0][0])
-        check = check and (shp_bBox[1][0] > b_bBox[1][0])
-        check = check and (shp_bBox[0][1] > b_bBox[0][1])
-        check = check and (shp_bBox[1][1] < b_bBox[1][1])
+        shp_bBox = [self.tifTrans.get_xy(x_min,y_min),  self.tifTrans.get_xy(x_max,y_max)]
+        check = (shp_bBox[0][0] >= b_bBox[0][0])
+        check = check and (shp_bBox[1][0] <= b_bBox[1][0])
+        check = check and (shp_bBox[0][1] <= b_bBox[0][1])
+        check = check and (shp_bBox[1][1] >= b_bBox[1][1])
 
         if not check:
             raise BoundaryNotInTifError()
@@ -234,7 +234,7 @@ class GeoTiff():
         if not tif_poly.contains(b_poly):
             raise BoundaryNotInTifError()
         
-        return(((x_min,y_min),(x_max,y_max)))
+        return(((x_min, y_min),(x_max, y_max)))
 
 
     def get_bBox_wgs_84(self, bBox: BBox) -> BBox:
