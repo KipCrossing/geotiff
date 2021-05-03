@@ -1,8 +1,10 @@
 # geotiff
 
-A noGDAL tool for reading and writing geotiff files
+A noGDAL tool for reading geotiff files
 
 WARNING this package is under development and some features are unstable. Use with caution. 
+
+Please support this project be giving it a [star on GitHub](https://github.com/Open-Source-Agriculture/geotiff)!
 
 ### What is noGDAL?
 
