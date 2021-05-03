@@ -3,7 +3,7 @@ import os
 import sys
 from setuptools.command.install import install
 
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 
 # Send to pypi
 # python3 setup.py sdist bdist_wheel

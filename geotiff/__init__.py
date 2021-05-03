@@ -155,8 +155,7 @@ class GeoTiff():
         yy: float = xxyy[1]
         crs_4326: CRS = CRS("WGS84")
         crs_proj: CRS = CRS.from_epsg(crs_code)
-        transformer: Transformer = Transformer.from_crs(
-            crs_proj, crs_4326, always_xy=True)
+        transformer: Transformer = Transformer.from_crs(crs_proj, crs_4326, always_xy=True)
         return(transformer.transform(xx, yy))
 
 
@@ -169,6 +168,7 @@ class GeoTiff():
             crs_4326, crs_proj, always_xy=True)
         return(transformer.transform(xx, yy))
 
+
     def _get_x_int(self, lon) -> int:
         step_x: float = float(
             self.tifShape[1]/(self.tif_bBox[1][0] - self.tif_bBox[0][0]))
@@ -177,6 +177,28 @@ class GeoTiff():
     def _get_y_int(self, lat) -> int:
         step_y: float = self.tifShape[0]/(self.tif_bBox[1][1] - self.tif_bBox[0][1])
         return(int(step_y*(lat - self.tif_bBox[0][1])))
+
+    def get_wgs_84_coords(self, i: int, j)-> Tuple[float, float]:
+        """for a given i, j in the entire tiff array,
+        returns the wgs_84 coordinates
+
+        Args:
+            i (int): col number of the array
+            j (int): row number of the array
+
+        Returns:
+            Tuple[float, float]: lon, lat
+        """
+        x, y = self.tifTrans.get_xy(i, j)
+        return(self._convert_to_wgs_84(self.crs_code, (x, y)))
+
+
+    @property
+    def tif_bBox_wgs_84(self) -> BBox: 
+        right_top = self._convert_to_wgs_84(self.crs_code, self.tif_bBox[0])
+        left_bottom = self._convert_to_wgs_84(self.crs_code, self.tif_bBox[1])
+        return(right_top, left_bottom)
+
 
     def get_int_box(self, bBox: BBox) -> BBoxInt:
         """Gets the intiger array index values based on a bounding box
@@ -192,16 +214,16 @@ class GeoTiff():
             BBoxInt: array index values
         """
         b_bBox = (self._convert_from_wgs_84(self.crs_code, bBox[0]), self._convert_from_wgs_84(self.crs_code, bBox[1]))
-        x_min: int = self._get_x_int(b_bBox[0][0])
-        y_min: int = self._get_y_int(b_bBox[0][1])
+        x_min: int = self._get_x_int(b_bBox[0][0]) + int(not self.tif_bBox[0][0]==b_bBox[0][0])
+        y_min: int = self._get_y_int(b_bBox[0][1]) + int(not self.tif_bBox[0][1]==b_bBox[0][1])
         x_max: int = self._get_x_int(b_bBox[1][0])
         y_max: int = self._get_y_int(b_bBox[1][1])
 
-        shp_bBox = [self.tifTrans.get_xy(x_min,y_min),  self.tifTrans.get_xy(x_max+1,y_max+1)]
-        check = (shp_bBox[0][0] < b_bBox[0][0])
-        check = check and (shp_bBox[1][0] > b_bBox[1][0])
-        check = check and (shp_bBox[0][1] > b_bBox[0][1])
-        check = check and (shp_bBox[1][1] < b_bBox[1][1])
+        shp_bBox = [self.tifTrans.get_xy(x_min,y_min),  self.tifTrans.get_xy(x_max,y_max)]
+        check = (shp_bBox[0][0] >= b_bBox[0][0])
+        check = check and (shp_bBox[1][0] <= b_bBox[1][0])
+        check = check and (shp_bBox[0][1] <= b_bBox[0][1])
+        check = check and (shp_bBox[1][1] >= b_bBox[1][1])
 
         if not check:
             raise BoundaryNotInTifError()
@@ -212,8 +234,23 @@ class GeoTiff():
         if not tif_poly.contains(b_poly):
             raise BoundaryNotInTifError()
         
-        return(((x_min,y_min),(x_max,y_max)))
+        return(((x_min, y_min),(x_max, y_max)))
 
+
+    def get_bBox_wgs_84(self, bBox: BBox) -> BBox:
+        """takes a bounding area gets the coordinates of the extremities
+        as if they were clipped by that bounding area
+
+        Args:
+            bBox (BBox): bounding box area to clip within (wgs_84)
+
+        Returns: 
+            BBox: in wgs_84
+        """
+        b = self.get_int_box(bBox)
+        left_top = self.get_wgs_84_coords(b[0][0], b[0][1])
+        right_bottom = self.get_wgs_84_coords(b[1][0], b[1][1])
+        return((left_top, right_bottom))
 
     def read(self) -> np.ndarray:
         """Reade the contents of the geotiff to a zarr array
