@@ -18,7 +18,7 @@ pip install geotiff
 
 ### Usage
 
-Read the GeoTiff to an array
+#### Read the GeoTiff to an array
 
 ```python
 from geotiff import GeoTiff
@@ -27,28 +27,55 @@ geoTiff = GeoTiff(tiff_file)
 array = geoTiff.read()
 ```
 
-Read a sections of a large tiff using a WGS 84 area
+Get bounding box info about the tiff
+
+```python
+# in the original CRS
+geotiff.tif_bBox
+# as WGS 84
+geotiff.tif_bBox_wgs_84
+```
+
+Get coordinates of a point/pixel
+
+```python
+i=5
+j=6
+geoTiff.get_wgs_84_coords(i, j)
+```
+
+Get the original crs code
+
+```python
+geotiff.crs_code
+```
+
+#### Read a sections of a large tiff using a WGS 84 area
 
 ```python
 from geotiff import GeoTiff
 
+# in WGS 84
 area_box = [(138.632071411, -32.447310785), (138.644218874, -32.456979174)]
 geotiff = GeoTiff(tiff_file)
 array = geotiff.read_box(area_box)
 ```
 
-This will detect and convert coordinates into WGS 84
-
-You can also get the coordinated of the actual bounding box
+Getting bounding box information
 
 ```python
-geotiff.tif_bBox
+# col and row indexes of the cut area
+int_box = geoTiff.get_int_box(area_box)
+# lon and lat coords of the cut points/pixels
+geoTiff.get_bBox_wgs_84(area_box)
 ```
 
-And the original crs code
+Get coordinates of a point/pixel
 
 ```python
-geotiff.crs_code
+i=int_box[0][0] + 5
+j=int_box[0][1] + 6
+geoTiff.get_wgs_84_coords(i, j)
 ```
 
 ### Contributing
