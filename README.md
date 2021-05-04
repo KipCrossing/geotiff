@@ -29,6 +29,12 @@ geoTiff = GeoTiff(tiff_file)
 array = geoTiff.read()
 ```
 
+This will detect the crs code. If it's 'user defined' and you know what it should be, you may supply a crs code:
+
+```python
+geoTiff = GeoTiff(tiff_file, crs_code=4236)
+```
+
 Get bounding box info about the tiff
 
 ```python
