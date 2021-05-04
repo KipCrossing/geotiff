@@ -109,6 +109,7 @@ class GeoTiff():
 
         Args:
             file (str): Location of the geoTiff file
+            crs_code (Optional[int]): the crs code of the tiff file
 
         Raises:
             FileTypeError: [description]
