@@ -230,6 +230,7 @@ class GeoTiff():
 
         Args:
             bBox (BBox): A bounding box
+            outer_points (bool = False): When True, includes the points/pixels that directly surround the bBox
 
         Raises:
             BoundaryNotInTifError: If the boundary is not enclosed withing the 
@@ -266,6 +267,7 @@ class GeoTiff():
 
         Args:
             bBox (BBox): bounding box area to clip within (wgs_84)
+            outer_points (bool = False): When True, includes the points/pixels that directly surround the bBox
 
         Returns: 
             BBox: in wgs_84
@@ -279,11 +281,20 @@ class GeoTiff():
         """Reade the contents of the geotiff to a zarr array
 
         Returns:
-            List[List[Union[int,float]]]: zarr array of the geotiff file
+            np.ndarray: zarr array of the geotiff file
         """
         return(self.z)
 
     def read_box(self, bBox: BBox, outer_points: bool = False) -> np.ndarray:
+        """[summary]
+
+        Args:
+            bBox (BBox): A bounding box
+            outer_points (bool, optional): When True, includes the points/pixels that directly surround the bBox. Defaults to False.
+
+        Returns:
+            np.ndarray: zarr array of the geotiff file
+        """
         ((x_min,y_min),(x_max,y_max)) = self.get_int_box(bBox, outer_points=outer_points)
         tiff_array = self.read()
         cut_tif_array: np.ndarray = tiff_array[y_min:y_max, x_min:x_max]
