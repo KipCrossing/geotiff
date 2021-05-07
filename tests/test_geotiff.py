@@ -41,6 +41,14 @@ def test_int_box(area_box, geoTiff: GeoTiff):
     assert ((126, 144), (169, 178)) == intBox
 
 
+def test_int_box_outer(area_box, geoTiff: GeoTiff):
+    intBox = geoTiff.get_int_box(area_box, outer_points=True)
+    assert isinstance(intBox, tuple)
+    assert len(intBox) == 2
+    assert isinstance(intBox[0], tuple)
+    assert isinstance(intBox[1], tuple)
+    assert ((125, 143), (170, 179)) == intBox
+
 def test_conversions(area_box, geoTiff: GeoTiff):
     int_box = geoTiff.get_int_box(area_box)
     geoTiff.get_bBox_wgs_84(area_box)
@@ -54,6 +62,8 @@ def test_conversions(area_box, geoTiff: GeoTiff):
     assert area_box[1][0] >= bounding_box[1][0]
     assert area_box[1][1] <= bounding_box[1][1]
 
-    print(geoTiff.read_box(area_box).shape)
+    assert geoTiff.read_box(area_box).shape == (34, 43)
+    assert geoTiff.read_box(area_box, outer_points=True).shape == (36, 45)
     assert geoTiff.tif_bBox_wgs_84 == (
         (138.5972222222219, -32.40749999999997), (138.69055555555522, -32.49138888888886))
+
