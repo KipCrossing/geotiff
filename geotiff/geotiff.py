@@ -260,7 +260,7 @@ class GeoTiff():
         return(((x_min, y_min),(x_max, y_max)))
 
 
-    def get_bBox_wgs_84(self, bBox: BBox) -> BBox:
+    def get_bBox_wgs_84(self, bBox: BBox, outer_points: bool = False) -> BBox:
         """takes a bounding area gets the coordinates of the extremities
         as if they were clipped by that bounding area
 
@@ -270,7 +270,7 @@ class GeoTiff():
         Returns: 
             BBox: in wgs_84
         """
-        b = self.get_int_box(bBox)
+        b = self.get_int_box(bBox, outer_points=outer_points)
         left_top = self.get_wgs_84_coords(b[0][0], b[0][1])
         right_bottom = self.get_wgs_84_coords(b[1][0], b[1][1])
         return((left_top, right_bottom))
