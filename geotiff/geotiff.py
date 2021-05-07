@@ -203,7 +203,29 @@ class GeoTiff():
         return(right_top, left_bottom)
 
 
-    def get_int_box(self, bBox: BBox) -> BBoxInt:
+    def _check_bound_in_tiff(self, shp_bBox, b_bBox):
+        check = (shp_bBox[0][0] >= b_bBox[0][0])
+        check = check and (shp_bBox[1][0] <= b_bBox[1][0])
+        check = check and (shp_bBox[0][1] <= b_bBox[0][1])
+        check = check and (shp_bBox[1][1] >= b_bBox[1][1])
+        if not check:
+            raise BoundaryNotInTifError()
+    
+        tif_poly: Polygon = Polygon([(self.tif_bBox[0][0], self.tif_bBox[0][1]), (self.tif_bBox[0][0], self.tif_bBox[1][1]),
+                            (self.tif_bBox[1][0], self.tif_bBox[1][1]), (self.tif_bBox[1][0], self.tif_bBox[0][1])])
+        b_poly: Polygon = Polygon([(b_bBox[0][0], b_bBox[0][1]), (b_bBox[0][0], b_bBox[1][1]),
+                        (b_bBox[1][0], b_bBox[1][1]), (b_bBox[1][0], b_bBox[0][1])])
+        if not tif_poly.contains(b_poly):
+            raise BoundaryNotInTifError()
+
+    def _get_outer_ints(self, b_bBox):
+        x_min: int = self._get_x_int(b_bBox[0][0]) + int(not self.tif_bBox[0][0]==b_bBox[0][0])
+        y_min: int = self._get_y_int(b_bBox[0][1]) + int(not self.tif_bBox[0][1]==b_bBox[0][1])
+        x_max: int = self._get_x_int(b_bBox[1][0])
+        y_max: int = self._get_y_int(b_bBox[1][1])
+        return(x_min, y_min, x_max, y_max)
+
+    def get_int_box(self, bBox: BBox, outer_points: bool = False) -> BBoxInt:
         """Gets the intiger array index values based on a bounding box
 
         Args:
@@ -216,27 +238,25 @@ class GeoTiff():
         Returns:
             BBoxInt: array index values
         """
-        b_bBox = (self._convert_from_wgs_84(self.crs_code, bBox[0]), self._convert_from_wgs_84(self.crs_code, bBox[1]))
-        x_min: int = self._get_x_int(b_bBox[0][0]) + int(not self.tif_bBox[0][0]==b_bBox[0][0])
-        y_min: int = self._get_y_int(b_bBox[0][1]) + int(not self.tif_bBox[0][1]==b_bBox[0][1])
-        x_max: int = self._get_x_int(b_bBox[1][0])
-        y_max: int = self._get_y_int(b_bBox[1][1])
+        b_bBox_0 = self._convert_from_wgs_84(self.crs_code, bBox[0])
+        b_bBox_1 = self._convert_from_wgs_84(self.crs_code, bBox[1])
+        b_bBox = (b_bBox_0, b_bBox_1)
+        x_min, y_min, x_max, y_max = self._get_outer_ints(b_bBox)
+
+        if outer_points:
+            x_min_out: int = x_min - 1
+            y_min_out: int = y_min - 1
+            x_max_out: int = x_max + 1
+            y_max_out: int = y_max + 1
+            height = self.tifShape[0]
+            width = self.tifShape[1]
+            if x_min_out < 0 or y_min_out < 0 or x_max_out > width or y_max_out > height:
+                raise BoundaryNotInTifError("Your area_box is too close to the tif edge and cannot get the outer points")
+            return((x_min_out, y_min_out), (x_max_out, y_max_out))
+
 
         shp_bBox = [self.tifTrans.get_xy(x_min,y_min),  self.tifTrans.get_xy(x_max,y_max)]
-        check = (shp_bBox[0][0] >= b_bBox[0][0])
-        check = check and (shp_bBox[1][0] <= b_bBox[1][0])
-        check = check and (shp_bBox[0][1] <= b_bBox[0][1])
-        check = check and (shp_bBox[1][1] >= b_bBox[1][1])
-
-        if not check:
-            raise BoundaryNotInTifError()
-        tif_poly: Polygon = Polygon([(self.tif_bBox[0][0], self.tif_bBox[0][1]), (self.tif_bBox[0][0], self.tif_bBox[1][1]),
-                            (self.tif_bBox[1][0], self.tif_bBox[1][1]), (self.tif_bBox[1][0], self.tif_bBox[0][1])])
-        b_poly: Polygon = Polygon([(b_bBox[0][0], b_bBox[0][1]), (b_bBox[0][0], b_bBox[1][1]),
-                        (b_bBox[1][0], b_bBox[1][1]), (b_bBox[1][0], b_bBox[0][1])])
-        if not tif_poly.contains(b_poly):
-            raise BoundaryNotInTifError()
-        
+        self._check_bound_in_tiff(shp_bBox, b_bBox)
         return(((x_min, y_min),(x_max, y_max)))
 
 
@@ -263,8 +283,8 @@ class GeoTiff():
         """
         return(self.z)
 
-    def read_box(self, bBox: BBox) -> np.ndarray:
-        ((x_min,y_min),(x_max,y_max)) = self.get_int_box(bBox)
+    def read_box(self, bBox: BBox, outer_points: bool = False) -> np.ndarray:
+        ((x_min,y_min),(x_max,y_max)) = self.get_int_box(bBox, outer_points=outer_points)
         tiff_array = self.read()
         cut_tif_array: np.ndarray = tiff_array[y_min:y_max, x_min:x_max]
         return(cut_tif_array)
