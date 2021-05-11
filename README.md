@@ -80,13 +80,13 @@ int_box = geoTiff.get_int_box(area_box)
 geoTiff.get_bBox_wgs_84(area_box)
 ```
 
-You can also get the points/pixels that directly surround the area_box
+You can also get extra n layers of points/pixels that directly surround the area_box
 
 ```python
 # col and row indexes of the cut area
-int_box = geoTiff.get_int_box(area_box, outer_points = True)
+int_box = geoTiff.get_int_box(area_box, outer_points = 1)
 # lon and lat coords of the cut points/pixels
-geoTiff.get_bBox_wgs_84(area_box, outer_points = True)
+geoTiff.get_bBox_wgs_84(area_box, outer_points = 1)
 ```
 
 This may be useful of you want to interpolate to points near the area_box boundary.
