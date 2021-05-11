@@ -66,8 +66,24 @@ def test_conversions(area_box, geoTiff: GeoTiff):
         (138.63222222222188, -32.44749999999997),
         (138.64416666666634, -32.45694444444442),
     )
-
     assert geoTiff.read_box(area_box, outer_points=True).shape == (36, 45)
+
+    bounding_box_outer = geoTiff.get_bBox_wgs_84(area_box, outer_points=True)
+
+    print(area_box)
+
+    assert area_box[0][0] >= bounding_box_outer[0][0]
+    assert area_box[0][1] <= bounding_box_outer[0][1]
+    assert area_box[1][0] <= bounding_box_outer[1][0]
+    assert area_box[1][1] >= bounding_box_outer[1][1]
+
+    bounding_box_outer2 = geoTiff.get_bBox_wgs_84(area_box, outer_points=2)
+
+    assert bounding_box_outer[0][0] >= bounding_box_outer2[0][0]
+    assert bounding_box_outer[0][1] <= bounding_box_outer2[0][1]
+    assert bounding_box_outer[1][0] <= bounding_box_outer2[1][0]
+    assert bounding_box_outer[1][1] >= bounding_box_outer2[1][1]
+
 
     assert geoTiff.get_bBox_wgs_84(area_box, outer_points=True) == (
         (138.63194444444412, -32.447222222222194),
