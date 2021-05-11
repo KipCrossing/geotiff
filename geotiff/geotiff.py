@@ -264,7 +264,7 @@ class GeoTiff:
 
         Args:
             bBox (BBox): A bounding box
-            outer_points (bool = False): When True, includes the points/pixels that directly surround the bBox
+            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
 
         Raises:
             BoundaryNotInTifError: If the boundary is not enclosed withing the
@@ -311,7 +311,7 @@ class GeoTiff:
 
         Args:
             bBox (BBox): bounding box area to clip within (wgs_84)
-            outer_points (bool = False): When True, includes the points/pixels that directly surround the bBox
+            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
 
         Returns:
             BBox: in wgs_84
@@ -336,7 +336,7 @@ class GeoTiff:
 
         Args:
             bBox (BBox): A bounding box
-            outer_points (bool, optional): When True, includes the points/pixels that directly surround the bBox. Defaults to False.
+            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
 
         Returns:
             np.ndarray: zarr array of the geotiff file
