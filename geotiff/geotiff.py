@@ -170,7 +170,7 @@ class GeoTiff:
     ) -> Tuple[float, float]:
         xx: float = xxyy[0]
         yy: float = xxyy[1]
-        crs_4326: CRS = CRS("WGS84")
+        crs_4326: CRS = CRS("epsg:4326")
         crs_proj: CRS = CRS.from_epsg(crs_code)
         transformer: Transformer = Transformer.from_crs(
             crs_proj, crs_4326, always_xy=True
@@ -182,7 +182,7 @@ class GeoTiff:
     ) -> Tuple[float, float]:
         xx: float = xxyy[0]
         yy: float = xxyy[1]
-        crs_4326: CRS = CRS("WGS84")
+        crs_4326: CRS = CRS("epsg:4326")
         crs_proj: CRS = CRS.from_epsg(crs_code)
         transformer: Transformer = Transformer.from_crs(
             crs_4326, crs_proj, always_xy=True
