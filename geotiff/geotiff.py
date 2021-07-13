@@ -11,7 +11,6 @@ BBoxInt = Tuple[Tuple[int, int], Tuple[int, int]]
 
 
 class GeographicTypeGeoKeyError(Exception):
-
     def __str__(_):
         return "Could not recognize the geo key\nPlease submit an issue: \
                 https://github.com/Open-Source-Agriculture/geotiff/issues"
@@ -108,7 +107,7 @@ class TifTransformer:
 
 
 class GeoTiff:
-    def __init__(self, file: str, band: int = 0, as_crs: Optional[int] = None, crs_code: Optional[int] = None):
+    def __init__(self, file: str, band: int = 0, as_crs: int = 4326, crs_code: Optional[int] = None):
         """For representing a geotiff
 
         Args:
@@ -119,6 +118,7 @@ class GeoTiff:
 
         """
         self.file = file
+        self.as_crs = as_crs
         tif = TiffFile(self.file)
 
         if not tif.is_geotiff:
@@ -171,19 +171,6 @@ class GeoTiff:
         )
         return transformer.transform(xx, yy)
 
-
-    def _convert_to_wgs_84(
-        self, crs_code: int, xxyy: Tuple[float, float]
-    ) -> Tuple[float, float]:
-        crs_4326 = 4326
-        return self._convert_crs(crs_code, crs_4326, xxyy)
-
-    def _convert_from_wgs_84(
-        self, crs_code: int, xxyy: Tuple[float, float]
-    ) -> Tuple[float, float]:
-        crs_4326 = 4326
-        return self._convert_crs(crs_4326, crs_code, xxyy)
-
     def _get_x_int(self, lon) -> int:
         step_x: float = float(
             self.tifShape[1] / (self.tif_bBox[1][0] - self.tif_bBox[0][0])
@@ -194,7 +181,7 @@ class GeoTiff:
         step_y: float = self.tifShape[0] / (self.tif_bBox[1][1] - self.tif_bBox[0][1])
         return int(step_y * (lat - self.tif_bBox[0][1]))
 
-    def get_wgs_84_coords(self, i: int, j) -> Tuple[float, float]:
+    def get_wgs_84_coords(self, i: int, j: int) -> Tuple[float, float]:
         """for a given i, j in the entire tiff array,
         returns the wgs_84 coordinates
 
@@ -206,12 +193,12 @@ class GeoTiff:
             Tuple[float, float]: lon, lat
         """
         x, y = self.tifTrans.get_xy(i, j)
-        return self._convert_to_wgs_84(self.crs_code, (x, y))
+        return self._convert_crs(self.crs_code, self.as_crs, (x, y))
 
     @property
     def tif_bBox_wgs_84(self) -> BBox:
-        right_top = self._convert_to_wgs_84(self.crs_code, self.tif_bBox[0])
-        left_bottom = self._convert_to_wgs_84(self.crs_code, self.tif_bBox[1])
+        right_top = self._convert_crs(self.crs_code, self.as_crs, self.tif_bBox[0])
+        left_bottom = self._convert_crs(self.crs_code, self.as_crs, self.tif_bBox[1])
         return (right_top, left_bottom)
 
     def _check_bound_in_tiff(self, shp_bBox, b_bBox):
@@ -249,8 +236,8 @@ class GeoTiff:
         Returns:
             BBoxInt: array index values
         """
-        b_bBox_0 = self._convert_from_wgs_84(self.crs_code, bBox[0])
-        b_bBox_1 = self._convert_from_wgs_84(self.crs_code, bBox[1])
+        b_bBox_0 = self._convert_crs(self.crs_code, self.as_crs, bBox[0])
+        b_bBox_1 = self._convert_crs(self.crs_code, self.as_crs, bBox[1])
         b_bBox = (b_bBox_0, b_bBox_1)
         x_min, y_min, x_max, y_max = self._get_outer_ints(b_bBox)
 
