@@ -3,3 +3,4 @@ tifffile
 numpy
 pyproj
 zarr
+pycrs
