@@ -10,8 +10,6 @@ BBoxInt = Tuple[Tuple[int, int], Tuple[int, int]]
 
 
 class GeographicTypeGeoKeyError(Exception):
-    def __init__(_):
-        pass
 
     def __str__(_):
         return "Could not recognize the geo key\nPlease submit an issue: \
@@ -19,9 +17,6 @@ class GeographicTypeGeoKeyError(Exception):
 
 
 class UserDefinedGeoKeyError(Exception):
-    def __init__(_):
-        pass
-
     def __str__(_):
         return "user-defined GeoKeys are not yet supported"
 
