@@ -237,9 +237,18 @@ class GeoTiff:
         Returns:
             BBoxInt: array index values
         """
+        # TODO this need to happen the other way around
+        # ! instead of converting to as_crs and then finding the ints,
+        # * convet to ins and then that's it?
+        # ? do i need to look into this?
+        # * think of this as north, south, east and west. 
+
+        # convert to as_crs
         b_bBox_0 = self._convert_crs(self.crs_code, self.as_crs, bBox[0])
         b_bBox_1 = self._convert_crs(self.crs_code, self.as_crs, bBox[1])
         b_bBox = (b_bBox_0, b_bBox_1)
+
+        # then get the outer ints based on
         x_min, y_min, x_max, y_max = self._get_outer_ints(b_bBox)
 
         if outer_points:
