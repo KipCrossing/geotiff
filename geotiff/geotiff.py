@@ -1,5 +1,4 @@
 from typing import List, Optional, Tuple, Union
-from shapely.geometry import Point, Polygon  # type: ignore
 from tifffile import imread, TiffFile  # type: ignore
 import numpy as np  # type: ignore
 from pyproj import Transformer, CRS
@@ -225,25 +224,6 @@ class GeoTiff:
         check = check and (shp_bBox[0][1] <= b_bBox[0][1])
         check = check and (shp_bBox[1][1] >= b_bBox[1][1])
         if not check:
-            raise BoundaryNotInTifError()
-
-        tif_poly: Polygon = Polygon(
-            [
-                (self.tif_bBox[0][0], self.tif_bBox[0][1]),
-                (self.tif_bBox[0][0], self.tif_bBox[1][1]),
-                (self.tif_bBox[1][0], self.tif_bBox[1][1]),
-                (self.tif_bBox[1][0], self.tif_bBox[0][1]),
-            ]
-        )
-        b_poly: Polygon = Polygon(
-            [
-                (b_bBox[0][0], b_bBox[0][1]),
-                (b_bBox[0][0], b_bBox[1][1]),
-                (b_bBox[1][0], b_bBox[1][1]),
-                (b_bBox[1][0], b_bBox[0][1]),
-            ]
-        )
-        if not tif_poly.contains(b_poly):
             raise BoundaryNotInTifError()
 
     def _get_outer_ints(self, b_bBox):
