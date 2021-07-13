@@ -3,7 +3,7 @@ from tifffile import imread, TiffFile  # type: ignore
 import numpy as np  # type: ignore
 from pyproj import Transformer, CRS
 import zarr  # type: ignore
-import pycrs
+import pycrs # type: ignore
 
 
 BBox = Tuple[Tuple[float, float], Tuple[float, float]]
