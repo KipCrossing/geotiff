@@ -3,6 +3,7 @@ from tifffile import imread, TiffFile  # type: ignore
 import numpy as np  # type: ignore
 from pyproj import Transformer, CRS
 import zarr  # type: ignore
+import pycrs
 
 
 BBox = Tuple[Tuple[float, float], Tuple[float, float]]
@@ -107,15 +108,15 @@ class TifTransformer:
 
 
 class GeoTiff:
-    def __init__(self, file: str, crs_code: Optional[int] = None):
+    def __init__(self, file: str, band: int = 0, as_crs: Optional[int] = None, crs_code: Optional[int] = None):
         """For representing a geotiff
 
         Args:
             file (str): Location of the geoTiff file
-            crs_code (Optional[int]): the crs code of the tiff file
+            band (int): The band of the tiff file to use. Defaults to 0.
+            as_crs (Optional[int]): the epsg crs code to read the data as
+            crs_code (Optional[int]): the epsg crs code of the tiff file
 
-        Raises:
-            FileTypeError: [description]
         """
         self.file = file
         tif = TiffFile(self.file)
@@ -159,29 +160,29 @@ class GeoTiff:
         else:
             raise GeographicTypeGeoKeyError()
 
+    def _convert_crs(
+        self, from_crs_code: int, to_crs_code: int, xxyy: Tuple[float, float]
+    ) -> Tuple[float, float]:
+        xx, yy= xxyy
+        from_crs_proj4 = pycrs.parse.from_epsg_code(from_crs_code).to_proj4()
+        to_crs_proj4 = pycrs.parse.from_epsg_code(to_crs_code).to_proj4()
+        transformer: Transformer = Transformer.from_crs(
+            from_crs_proj4, to_crs_proj4, always_xy=True
+        )
+        return transformer.transform(xx, yy)
+
+
     def _convert_to_wgs_84(
         self, crs_code: int, xxyy: Tuple[float, float]
     ) -> Tuple[float, float]:
-        xx: float = xxyy[0]
-        yy: float = xxyy[1]
-        crs_4326: CRS = CRS("epsg:4326")
-        crs_proj: CRS = CRS.from_epsg(crs_code)
-        transformer: Transformer = Transformer.from_crs(
-            crs_proj, crs_4326, always_xy=True
-        )
-        return transformer.transform(xx, yy)
+        crs_4326 = 4326
+        return self._convert_crs(crs_code, crs_4326, xxyy)
 
     def _convert_from_wgs_84(
         self, crs_code: int, xxyy: Tuple[float, float]
     ) -> Tuple[float, float]:
-        xx: float = xxyy[0]
-        yy: float = xxyy[1]
-        crs_4326: CRS = CRS("epsg:4326")
-        crs_proj: CRS = CRS.from_epsg(crs_code)
-        transformer: Transformer = Transformer.from_crs(
-            crs_4326, crs_proj, always_xy=True
-        )
-        return transformer.transform(xx, yy)
+        crs_4326 = 4326
+        return self._convert_crs(crs_4326, crs_code, xxyy)
 
     def _get_x_int(self, lon) -> int:
         step_x: float = float(
