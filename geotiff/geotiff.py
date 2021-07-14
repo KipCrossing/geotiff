@@ -130,7 +130,7 @@ class GeoTiff:
         if not tif.is_geotiff:
             raise Exception("Not a geotiff file")
 
-        store = tif.aszarr(key=band)
+        store = tif.aszarr(key=band, chunkmode=2)
         self.z = zarr.open(store, mode="r")
         store.close()
         if isinstance(crs_code, int):
@@ -165,6 +165,27 @@ class GeoTiff:
             raise UserDefinedGeoKeyError()
         else:
             raise GeographicTypeGeoKeyError()
+
+    def _populate_2d_array(self, i_array, j_array) -> np.ndarray:
+        return np.array([np.stack((np.array(i_array), np.ones(len(i_array)) * j), axis=-1) for j in j_array])
+
+    def _convert_coords_array(
+        self, 
+        from_crs_code: int, 
+        to_crs_code: int, 
+        i_list: List[float], 
+        j_list: List[float]
+    ):
+        ij_2d_array = self._populate_2d_array(i_list, j_list)
+        # convert to x_vals and y_vals via tiffTransformer
+        get_xy = lambda e: np.array(list(self.tifTrans.get_xy(e[0], e[1])))
+        xy_2d_array = np.apply_along_axis(get_xy, -1, ij_2d_array)
+        x_vals = xy_2d_array[:,:,0]
+        y_vals = xy_2d_array[:,:,1]
+        from_crs_proj4 = pycrs.parse.from_epsg_code(from_crs_code).to_proj4()
+        to_crs_proj4 = pycrs.parse.from_epsg_code(to_crs_code).to_proj4()
+        transformer: Transformer = Transformer.from_crs(from_crs_proj4, to_crs_proj4, always_xy=True)
+        return transformer.transform(x_vals, y_vals)
 
     def _convert_coords(
         self, from_crs_code: int, to_crs_code: int, xxyy: Tuple[float, float]
@@ -214,12 +235,6 @@ class GeoTiff:
         """
         x, y = self.tifTrans.get_xy(i, j)
         return self._convert_coords(self.crs_code, 4326, (x, y))
-
-    @property
-    def tif_bBox(self) -> BBox:
-        right_top = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[0])
-        left_bottom = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[1])
-        return (right_top, left_bottom)
 
     @property
     def tif_bBox_wgs_84(self) -> BBox:
@@ -322,6 +337,28 @@ class GeoTiff:
         left_top = self.get_wgs_84_coords(b[0][0], b[0][1])
         right_bottom = self.get_wgs_84_coords(b[1][0], b[1][1])
         return (left_top, right_bottom)
+
+
+    def get_coord_arrays(self, bBox: Optional[BBox] = None, outer_points: int = 0) -> Tuple[np.ndarray, np.ndarray]:
+        """gets the 2d x coordinates and the 2d y coordinates
+
+        WARNING: this cannot handel big arrays (zarr), so use with caution
+
+        Args:
+            bBox (Optional[BBox], optional): The bounding box to git the coordinates within
+            outer_points (int, optional): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: 2d x coordinates and the 2d y coordinates
+        """
+        if bBox == None:
+            i_list = [i for i in range(self.tif_shape[1])]
+            j_list = [i for i in range(self.tif_shape[0])]
+            return self._convert_coords_array(self.crs_code, self.as_crs, i_list, j_list)
+        ((x_min, y_min), (x_max, y_max)) = self.get_int_box(bBox, outer_points=outer_points)
+        i_list = [i for i in range(x_min, x_max)]
+        j_list = [i for i in range(y_min, y_max)]
+        return self._convert_coords_array(self.crs_code, self.as_crs, i_list, j_list)
 
     def read(self) -> zarr.Array:
         """Reade the contents of the geotiff to a zarr array
