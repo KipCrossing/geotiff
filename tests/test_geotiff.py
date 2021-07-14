@@ -23,6 +23,7 @@ def geoTiff(tiff_file):
 
 def test_read(geoTiff: GeoTiff):
     zarr_array = geoTiff.read()
+    print(zarr_array.info)
     assert isinstance(zarr_array, zarr.Array)
     print(zarr_array.chunks)
 
