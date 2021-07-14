@@ -131,15 +131,15 @@ class GeoTiff:
             self.crs_code: int = crs_code
         else:
             self.crs_code = self._get_crs_code(tif.geotiff_metadata)
-        self.tifShape: List[int] = self.z.shape
+        self.tif_shape: List[int] = self.z.shape
         scale: Tuple[float, float, float] = tif.geotiff_metadata["ModelPixelScale"]
         tilePoint: List[float] = tif.geotiff_metadata["ModelTiepoint"]
         self.tifTrans: TifTransformer = TifTransformer(
-            self.tifShape[0], self.tifShape[1], scale, tilePoint
+            self.tif_shape[0], self.tif_shape[1], scale, tilePoint
         )
         self.tif_bBox: BBox = (
             self.tifTrans.get_xy(0, 0),
-            self.tifTrans.get_xy(self.tifShape[1], self.tifShape[0]),
+            self.tifTrans.get_xy(self.tif_shape[1], self.tif_shape[0]),
         )
         tif.close()
 
@@ -173,13 +173,11 @@ class GeoTiff:
         return transformer.transform(xx, yy)
 
     def _get_x_int(self, lon) -> int:
-        step_x: float = float(
-            self.tifShape[1] / (self.tif_bBox[1][0] - self.tif_bBox[0][0])
-        )
+        step_x: float = float(self.tif_shape[1] / (self.tif_bBox[1][0] - self.tif_bBox[0][0]))
         return int(step_x * (lon - self.tif_bBox[0][0]))
 
     def _get_y_int(self, lat) -> int:
-        step_y: float = self.tifShape[0] / (self.tif_bBox[1][1] - self.tif_bBox[0][1])
+        step_y: float = self.tif_shape[0] / (self.tif_bBox[1][1] - self.tif_bBox[0][1])
         return int(step_y * (lat - self.tif_bBox[0][1]))
 
     def get_wgs_84_coords(self, i: int, j: int) -> Tuple[float, float]:
@@ -211,12 +209,8 @@ class GeoTiff:
             raise BoundaryNotInTifError()
 
     def _get_outer_ints(self, b_bBox):
-        x_min: int = self._get_x_int(b_bBox[0][0]) + int(
-            not self.tif_bBox[0][0] == b_bBox[0][0]
-        )
-        y_min: int = self._get_y_int(b_bBox[0][1]) + int(
-            not self.tif_bBox[0][1] == b_bBox[0][1]
-        )
+        x_min: int = self._get_x_int(b_bBox[0][0]) + int(not self.tif_bBox[0][0] == b_bBox[0][0])
+        y_min: int = self._get_y_int(b_bBox[0][1]) + int(not self.tif_bBox[0][1] == b_bBox[0][1])
         x_max: int = self._get_x_int(b_bBox[1][0])
         y_max: int = self._get_y_int(b_bBox[1][1])
         return (x_min, y_min, x_max, y_max)
@@ -237,44 +231,58 @@ class GeoTiff:
         Returns:
             BBoxInt: array index values
         """
-        # TODO this need to happen the other way around
-        # ! instead of converting to as_crs and then finding the ints,
-        # * convet to ins and then that's it?
-        # ? do i need to look into this?
-        # * think of this as north, south, east and west. 
 
-        # convert to as_crs
-        b_bBox_0 = self._convert_crs(self.crs_code, self.as_crs, bBox[0])
-        b_bBox_1 = self._convert_crs(self.crs_code, self.as_crs, bBox[1])
-        b_bBox = (b_bBox_0, b_bBox_1)
+        # all 4 corners  of box
+        left_top = bBox[0]
+        right_bottom = bBox[1]
+        left_bottom = (bBox[0][0], bBox[1][1])
+        right_top = (bBox[1][0], bBox[0][1])
+
+        left_top_c = self._convert_crs(self.as_crs, self.crs_code, left_top)
+        right_bottom_c = self._convert_crs(self.as_crs, self.crs_code, right_bottom)
+        left_bottom_c = self._convert_crs(self.as_crs, self.crs_code, left_bottom)
+        right_top_c = self._convert_crs(self.as_crs, self.crs_code, right_top)
+        
+
+        all_x = [left_top_c[0], left_bottom_c[0], right_bottom_c[0], right_top_c[0]]
+        all_y = [left_top_c[1], left_bottom_c[1], right_bottom_c[1], right_top_c[1]]
 
         # then get the outer ints based on
-        x_min, y_min, x_max, y_max = self._get_outer_ints(b_bBox)
+        x_min = min(all_x)
+        y_min =  min(all_y)
+        x_max = max(all_x)
+        y_max = max(all_y)
+
+        # convert to int
+        i_min = self._get_x_int(x_min) + int(not self.tif_bBox[0][0] == x_min) # rounds up unless equal to the tif_bBox
+        j_min = self._get_y_int(y_max) + int(not self.tif_bBox[0][1] == y_max)
+        i_max = self._get_x_int(x_max)
+        j_max = self._get_y_int(y_min)
 
         if outer_points:
-            x_min_out: int = x_min - int(outer_points)
-            y_min_out: int = y_min - int(outer_points)
-            x_max_out: int = x_max + int(outer_points)
-            y_max_out: int = y_max + int(outer_points)
-            height = self.tifShape[0]
-            width = self.tifShape[1]
+            i_min_out: int = i_min - int(outer_points)
+            j_min_out: int = j_min - int(outer_points)
+            i_max_out: int = i_max + int(outer_points)
+            j_max_out: int = j_max + int(outer_points)
+            height = self.tif_shape[0]
+            width = self.tif_shape[1]
             if (
-                x_min_out < 0
-                or y_min_out < 0
-                or x_max_out > width
-                or y_max_out > height
+                i_min_out < 0
+                or j_min_out < 0
+                or i_max_out > width
+                or j_max_out > height
             ):
                 raise BoundaryNotInTifError(
                     "Your area_box is too close to the tif edge and cannot get the outer points"
                 )
-            return ((x_min_out, y_min_out), (x_max_out, y_max_out))
+            return ((i_min_out, j_min_out), (i_max_out, j_max_out))
 
         shp_bBox = [
-            self.tifTrans.get_xy(x_min, y_min),
-            self.tifTrans.get_xy(x_max, y_max),
+            self.tifTrans.get_xy(i_min, j_min),
+            self.tifTrans.get_xy(i_max, j_max),
         ]
-        self._check_bound_in_tiff(shp_bBox, b_bBox)
-        return ((x_min, y_min), (x_max, y_max))
+        self._check_bound_in_tiff(shp_bBox, ((x_min, y_max), (x_max, y_min)))
+        return ((i_min, j_min), (i_max, j_max))
 
     def get_bBox_wgs_84(
         self, bBox: BBox, outer_points: Union[bool, int] = False
@@ -294,7 +302,7 @@ class GeoTiff:
         right_bottom = self.get_wgs_84_coords(b[1][0], b[1][1])
         return (left_top, right_bottom)
 
-    def read(self) -> np.ndarray:
+    def read(self) -> zarr.Array:
         """Reade the contents of the geotiff to a zarr array
 
         Returns:
