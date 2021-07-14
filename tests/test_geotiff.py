@@ -9,6 +9,8 @@ def tiff_file():
     filename = "dem.tif"
     dir = dir = "./tests/inputs/"
     return os.path.join(dir, filename)
+    # return "/home/kipling/Documents/fsm_sample_data/slgd/AWC_000_005_05_N_P_AU_NAT_C_20140801.tif"
+    # return "/home/kipling/Documents/fsm_sample_data/backup/red.tif"
 
 
 @pytest.fixture
@@ -103,3 +105,8 @@ def test_conversions(area_box, geoTiff: GeoTiff):
         (138.5972222222219, -32.40749999999997),
         (138.69055555555522, -32.49138888888886),
     )
+
+def test_get_coord_arrays(geoTiff: GeoTiff, area_box):
+    print(geoTiff.tif_bBox_wgs_84)
+    print(geoTiff.get_coord_arrays())
+    print(geoTiff.get_coord_arrays(bBox=area_box))
