@@ -2,7 +2,7 @@ import numpy as np  # type: ignore
 import pytest
 import os
 from geotiff import GeoTiff
-
+import zarr
 
 @pytest.fixture
 def tiff_file():
@@ -21,10 +21,18 @@ def geoTiff(tiff_file):
     return GeoTiff(tiff_file)
 
 
-def test_read(tiff_file, area_box, geoTiff: GeoTiff):
+def test_read(geoTiff: GeoTiff):
+    zarr_array = geoTiff.read()
+    assert isinstance(zarr_array, zarr.Array)
+    print(zarr_array.chunks)
+
+
+def test_read_box(tiff_file, area_box, geoTiff: GeoTiff):
     print("testing read tiff")
     print(f"reading: {tiff_file}")
     print(f"Using bBox: {area_box}")
+    print(f"crs_code: {geoTiff.crs_code}")
+    print(f"as_crs: {geoTiff.as_crs}")
     array = geoTiff.read_box(area_box)
     print("Sample array:")
     print(array)
