@@ -157,7 +157,10 @@ class GeoTiff:
             # if the ProjectedCSTypeGeoKey is user defined (32767)
             # use supplied keys to get the datum and define the CRS
         elif geotiff_metadata["GTModelTypeGeoKey"].value == 2:
-            temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
+            if isinstance(geotiff_metadata["GeographicTypeGeoKey"], int):
+                temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"]
+            else:
+                temp_crs_code = geotiff_metadata["GeographicTypeGeoKey"].value
 
         if temp_crs_code != 32767 and isinstance(temp_crs_code, int):
             return temp_crs_code
@@ -194,8 +197,11 @@ class GeoTiff:
         self, from_crs_code: int, to_crs_code: int, xxyy: Tuple[float, float]
     ) -> Tuple[float, float]:
         xx, yy = xxyy
-        from_crs_proj4 = pycrs.parse.from_epsg_code(from_crs_code).to_proj4()
-        to_crs_proj4 = pycrs.parse.from_epsg_code(to_crs_code).to_proj4()
+        # TODO remove dep on pycrs
+        # from_crs_proj4 = pycrs.parse.from_epsg_code(from_crs_code).to_proj4()
+        # to_crs_proj4 = pycrs.parse.from_epsg_code(to_crs_code).to_proj4()
+        from_crs_proj4 = CRS.from_epsg(from_crs_code).to_proj4()
+        to_crs_proj4 = CRS.from_epsg(to_crs_code)
         transformer: Transformer = Transformer.from_crs(
             from_crs_proj4, to_crs_proj4, always_xy=True
         )
