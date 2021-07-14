@@ -167,24 +167,27 @@ class GeoTiff:
             raise GeographicTypeGeoKeyError()
 
     def _populate_2d_array(self, i_array, j_array) -> np.ndarray:
-        return np.array([np.stack((np.array(i_array), np.ones(len(i_array)) * j), axis=-1) for j in j_array])
+        return np.array(
+            [
+                np.stack((np.array(i_array), np.ones(len(i_array)) * j), axis=-1)
+                for j in j_array
+            ]
+        )
 
     def _convert_coords_array(
-        self, 
-        from_crs_code: int, 
-        to_crs_code: int, 
-        i_list: List[float], 
-        j_list: List[float]
+        self, from_crs_code: int, to_crs_code: int, i_list: List[int], j_list: List[int]
     ):
         ij_2d_array = self._populate_2d_array(i_list, j_list)
         # convert to x_vals and y_vals via tiffTransformer
         get_xy = lambda e: np.array(list(self.tifTrans.get_xy(e[0], e[1])))
         xy_2d_array = np.apply_along_axis(get_xy, -1, ij_2d_array)
-        x_vals = xy_2d_array[:,:,0]
-        y_vals = xy_2d_array[:,:,1]
+        x_vals = xy_2d_array[:, :, 0]
+        y_vals = xy_2d_array[:, :, 1]
         from_crs_proj4 = pycrs.parse.from_epsg_code(from_crs_code).to_proj4()
         to_crs_proj4 = pycrs.parse.from_epsg_code(to_crs_code).to_proj4()
-        transformer: Transformer = Transformer.from_crs(from_crs_proj4, to_crs_proj4, always_xy=True)
+        transformer: Transformer = Transformer.from_crs(
+            from_crs_proj4, to_crs_proj4, always_xy=True
+        )
         return transformer.transform(x_vals, y_vals)
 
     def _convert_coords(
@@ -338,8 +341,11 @@ class GeoTiff:
         right_bottom = self.get_wgs_84_coords(b[1][0], b[1][1])
         return (left_top, right_bottom)
 
-
-    def get_coord_arrays(self, bBox: Optional[BBox] = None, outer_points: int = 0) -> Tuple[np.ndarray, np.ndarray]:
+    def get_coord_arrays(
+        self, 
+        bBox: Optional[BBox] = None, 
+        outer_points: int = 0
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """gets the 2d x coordinates and the 2d y coordinates
 
         WARNING: this cannot handel big arrays (zarr), so use with caution
@@ -354,11 +360,19 @@ class GeoTiff:
         if bBox == None:
             i_list = [i for i in range(self.tif_shape[1])]
             j_list = [i for i in range(self.tif_shape[0])]
-            return self._convert_coords_array(self.crs_code, self.as_crs, i_list, j_list)
-        ((x_min, y_min), (x_max, y_max)) = self.get_int_box(bBox, outer_points=outer_points)
-        i_list = [i for i in range(x_min, x_max)]
-        j_list = [i for i in range(y_min, y_max)]
-        return self._convert_coords_array(self.crs_code, self.as_crs, i_list, j_list)
+            return self._convert_coords_array(
+                self.crs_code, self.as_crs, i_list, j_list
+            )
+        elif isinstance(bBox, tuple):
+            ((x_min, y_min), (x_max, y_max)) = self.get_int_box(
+                bBox, outer_points=outer_points
+            )
+            i_list = [i for i in range(x_min, x_max)]
+            j_list = [i for i in range(y_min, y_max)]
+            return self._convert_coords_array(
+                self.crs_code, self.as_crs, i_list, j_list
+            )
+        raise TypeError(f"You must supply a valid bBox. You gave: {bBox}")
 
     def read(self) -> zarr.Array:
         """Reade the contents of the geotiff to a zarr array
