@@ -3,7 +3,7 @@ from tifffile import imread, TiffFile  # type: ignore
 import numpy as np  # type: ignore
 from pyproj import Transformer, CRS
 import zarr  # type: ignore
-import pycrs # type: ignore
+import pycrs  # type: ignore
 
 
 BBox = Tuple[Tuple[float, float], Tuple[float, float]]
@@ -107,7 +107,13 @@ class TifTransformer:
 
 
 class GeoTiff:
-    def __init__(self, file: str, band: int = 0, as_crs: int = 4326, crs_code: Optional[int] = None):
+    def __init__(
+        self,
+        file: str,
+        band: int = 0,
+        as_crs: int = 4326,
+        crs_code: Optional[int] = None,
+    ):
         """For representing a geotiff
 
         Args:
@@ -160,11 +166,10 @@ class GeoTiff:
         else:
             raise GeographicTypeGeoKeyError()
 
-
     def _convert_crs(
         self, from_crs_code: int, to_crs_code: int, xxyy: Tuple[float, float]
     ) -> Tuple[float, float]:
-        xx, yy= xxyy
+        xx, yy = xxyy
         from_crs_proj4 = pycrs.parse.from_epsg_code(from_crs_code).to_proj4()
         to_crs_proj4 = pycrs.parse.from_epsg_code(to_crs_code).to_proj4()
         transformer: Transformer = Transformer.from_crs(
@@ -208,13 +213,6 @@ class GeoTiff:
         if not check:
             raise BoundaryNotInTifError()
 
-    def _get_outer_ints(self, b_bBox):
-        x_min: int = self._get_x_int(b_bBox[0][0]) + int(not self.tif_bBox[0][0] == b_bBox[0][0])
-        y_min: int = self._get_y_int(b_bBox[0][1]) + int(not self.tif_bBox[0][1] == b_bBox[0][1])
-        x_max: int = self._get_x_int(b_bBox[1][0])
-        y_max: int = self._get_y_int(b_bBox[1][1])
-        return (x_min, y_min, x_max, y_max)
-
     def get_int_box(
         self, bBox: BBox, outer_points: Union[bool, int] = False
     ) -> BBoxInt:
@@ -242,20 +240,21 @@ class GeoTiff:
         right_bottom_c = self._convert_crs(self.as_crs, self.crs_code, right_bottom)
         left_bottom_c = self._convert_crs(self.as_crs, self.crs_code, left_bottom)
         right_top_c = self._convert_crs(self.as_crs, self.crs_code, right_top)
-        
 
         all_x = [left_top_c[0], left_bottom_c[0], right_bottom_c[0], right_top_c[0]]
         all_y = [left_top_c[1], left_bottom_c[1], right_bottom_c[1], right_top_c[1]]
 
         # then get the outer ints based on
         x_min = min(all_x)
-        y_min =  min(all_y)
+        y_min = min(all_y)
         x_max = max(all_x)
         y_max = max(all_y)
 
         # convert to int
-        i_min = self._get_x_int(x_min) + int(not self.tif_bBox[0][0] == x_min) # rounds up unless equal to the tif_bBox
-        j_min = self._get_y_int(y_max) + int(not self.tif_bBox[0][1] == y_max)
+        i_bump = int(not self.tif_bBox[0][0] == x_min)
+        i_min = self._get_x_int(x_min) + i_bump
+        j_bump = int(not self.tif_bBox[0][1] == y_max)
+        j_min = self._get_y_int(y_max) + j_bump
         i_max = self._get_x_int(x_max)
         j_max = self._get_y_int(y_min)
 
