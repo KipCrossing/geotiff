@@ -166,7 +166,7 @@ class GeoTiff:
         else:
             raise GeographicTypeGeoKeyError()
 
-    def _convert_crs(
+    def _convert_coords(
         self, from_crs_code: int, to_crs_code: int, xxyy: Tuple[float, float]
     ) -> Tuple[float, float]:
         xx, yy = xxyy
@@ -187,6 +187,20 @@ class GeoTiff:
         step_y: float = self.tif_shape[0] / y_range
         return int(step_y * (lat - self.tif_bBox[0][1]))
 
+    def get_coords(self, i: int, j: int) -> Tuple[float, float]:
+        """for a given i, j in the entire tiff array,
+        returns the as_crs coordinates
+
+        Args:
+            i (int): col number of the array
+            j (int): row number of the array
+
+        Returns:
+            Tuple[float, float]: lon, lat
+        """
+        x, y = self.tifTrans.get_xy(i, j)
+        return self._convert_coords(self.crs_code, self.as_crs, (x, y))
+
     def get_wgs_84_coords(self, i: int, j: int) -> Tuple[float, float]:
         """for a given i, j in the entire tiff array,
         returns the wgs_84 coordinates
@@ -199,12 +213,18 @@ class GeoTiff:
             Tuple[float, float]: lon, lat
         """
         x, y = self.tifTrans.get_xy(i, j)
-        return self._convert_crs(self.crs_code, self.as_crs, (x, y))
+        return self._convert_coords(self.crs_code, 4326, (x, y))
+
+    @property
+    def tif_bBox(self) -> BBox:
+        right_top = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[0])
+        left_bottom = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[1])
+        return (right_top, left_bottom)
 
     @property
     def tif_bBox_wgs_84(self) -> BBox:
-        right_top = self._convert_crs(self.crs_code, self.as_crs, self.tif_bBox[0])
-        left_bottom = self._convert_crs(self.crs_code, self.as_crs, self.tif_bBox[1])
+        right_top = self._convert_coords(self.crs_code, 4326, self.tif_bBox[0])
+        left_bottom = self._convert_coords(self.crs_code, 4326, self.tif_bBox[1])
         return (right_top, left_bottom)
 
     def _check_bound_in_tiff(self, shp_bBox, b_bBox):
@@ -238,10 +258,10 @@ class GeoTiff:
         left_bottom = (bBox[0][0], bBox[1][1])
         right_top = (bBox[1][0], bBox[0][1])
 
-        left_top_c = self._convert_crs(self.as_crs, self.crs_code, left_top)
-        right_bottom_c = self._convert_crs(self.as_crs, self.crs_code, right_bottom)
-        left_bottom_c = self._convert_crs(self.as_crs, self.crs_code, left_bottom)
-        right_top_c = self._convert_crs(self.as_crs, self.crs_code, right_top)
+        left_top_c = self._convert_coords(self.as_crs, self.crs_code, left_top)
+        right_bottom_c = self._convert_coords(self.as_crs, self.crs_code, right_bottom)
+        left_bottom_c = self._convert_coords(self.as_crs, self.crs_code, left_bottom)
+        right_top_c = self._convert_coords(self.as_crs, self.crs_code, right_top)
 
         all_x = [left_top_c[0], left_bottom_c[0], right_bottom_c[0], right_top_c[0]]
         all_y = [left_top_c[1], left_bottom_c[1], right_bottom_c[1], right_top_c[1]]
