@@ -178,11 +178,13 @@ class GeoTiff:
         return transformer.transform(xx, yy)
 
     def _get_x_int(self, lon) -> int:
-        step_x: float = float(self.tif_shape[1] / (self.tif_bBox[1][0] - self.tif_bBox[0][0]))
+        x_range = self.tif_bBox[1][0] - self.tif_bBox[0][0]
+        step_x: float = float(self.tif_shape[1] / x_range)
         return int(step_x * (lon - self.tif_bBox[0][0]))
 
     def _get_y_int(self, lat) -> int:
-        step_y: float = self.tif_shape[0] / (self.tif_bBox[1][1] - self.tif_bBox[0][1])
+        y_range = self.tif_bBox[1][1] - self.tif_bBox[0][1]
+        step_y: float = self.tif_shape[0] / y_range
         return int(step_y * (lat - self.tif_bBox[0][1]))
 
     def get_wgs_84_coords(self, i: int, j: int) -> Tuple[float, float]:
