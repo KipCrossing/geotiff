@@ -326,5 +326,5 @@ class GeoTiff:
             bBox, outer_points=outer_points
         )
         tiff_array = self.read()
-        cut_tif_array: np.ndarray = tiff_array[y_min:y_max, x_min:x_max]
+        cut_tif_array: np.ndarray = np.array(tiff_array[y_min:y_max, x_min:x_max])
         return cut_tif_array
