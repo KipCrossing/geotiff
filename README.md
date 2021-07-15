@@ -174,7 +174,7 @@ lon_array, lat_array = geo_tiff.get_coord_arrays()
 
 If you would like to contribute to this project, please fork this repo and make a PR with you patches.
 
-You can join the conversation by saying hi in the [project discussion board](https://github.com/Open-Source-Agriculture/geotiff/discussions).
+You can join the conversation by saying hi in the [project discussion board](https://github.com/KipCrossing/geotiff/discussions).
 
 To help users and and other contributes, be sure to:
 - make doc blocs if appropriate
