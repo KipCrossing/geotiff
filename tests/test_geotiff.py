@@ -3,7 +3,7 @@ import numpy as np  # type: ignore
 import pytest
 import os
 from geotiff import GeoTiff
-import zarr
+import zarr  # type: ignore
 
 @pytest.fixture(params=["dem.tif", "gda_94_sand.tif",  "sand_test.tif", "red.tif"])
 def geo_tiff(request):

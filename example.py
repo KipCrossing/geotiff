@@ -4,17 +4,18 @@ import os
 from geotiff import GeoTiff # type: ignore
 
 
-filename = "dem.tif"
-# filename = "red.tif"
+# filename = "dem.tif"
+# filename = "dem_new.tif"
+filename = "red.tif"
 dir = "./tests/inputs/"
 tiff_file = os.path.join(dir, filename)
-area_box: List[Tuple[float, float]] = ((138.632071411, -32.447310785), (138.644218874, -32.456979174))
+area_box = ((138.632071411, -32.447310785), (138.644218874, -32.456979174))
 
 if __name__ == '__main__':
     print("testing read tiff")
     print(f"reading: {tiff_file}")
     print(f"Using bBox: {area_box}")
-    geo_tiff: GeoTiff = GeoTiff(tiff_file, crs_code=4326, as_crs=4326,  band=0)
+    geo_tiff: GeoTiff = GeoTiff(tiff_file)
 
     print()
     print(geo_tiff.crs_code)
@@ -49,3 +50,4 @@ if __name__ == '__main__':
     lon_array, lat_array = geo_tiff.get_coord_arrays()
     print(np.array(lon_array))
     print(np.array(lat_array))
+    geo_tiff.write("tests/inputs/red_new.tif")

@@ -1,8 +1,9 @@
 from typing import List, Optional, Tuple, Union
-from tifffile import imread, TiffFile  # type: ignore
+from tifffile import imread, TiffFile, imwrite  # type: ignore
 import numpy as np  # type: ignore
 from pyproj import Transformer, CRS
 import zarr  # type: ignore
+import tifftools  # type: ignore
 
 
 BBox = Tuple[Tuple[float, float], Tuple[float, float]]
@@ -420,3 +421,20 @@ class GeoTiff:
         tiff_array = self.read()
         cut_tif_array: np.ndarray = np.array(tiff_array[y_min:y_max, x_min:x_max])
         return cut_tif_array
+
+    def write(self, file: str):
+        print("WARNING: this method is expiremental and is UNSTABLE")
+        temp_file = "temp.tif"
+        imwrite(file = temp_file, data = self._z)
+        info_original = tifftools.read_tiff(self.file)
+        info_temp = tifftools.read_tiff(temp_file)
+        original_tag_dict = info_original['ifds'][0]['tags']
+        temp_tag_dict = info_temp['ifds'][0]['tags']
+
+        for k, v in original_tag_dict.items():
+            if k not in temp_tag_dict.keys():
+                print(k, v)
+                info_temp['ifds'][0]['tags'][k] = v
+
+        tifftools.write_tiff(info_temp, file, allowExisting=True)
+        
