@@ -9,7 +9,7 @@ from geotiff import GeoTiff # type: ignore
 filename = "red.tif"
 dir = "./tests/inputs/"
 tiff_file = os.path.join(dir, filename)
-area_box: List[Tuple[float, float]] = ((138.632071411, -32.447310785), (138.644218874, -32.456979174))
+area_box = ((138.632071411, -32.447310785), (138.644218874, -32.456979174))
 
 if __name__ == '__main__':
     print("testing read tiff")
