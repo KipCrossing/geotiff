@@ -1,6 +1,7 @@
 # Geotiff
 geotiff_logging.py
 example.py
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
