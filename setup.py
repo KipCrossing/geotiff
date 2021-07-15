@@ -1,7 +1,7 @@
-import setuptools
+import setuptools  # type: ignore
 import os
 import sys
-from setuptools.command.install import install
+from setuptools.command.install import install  # type: ignore
 
 VERSION = "0.2a1"
 
