@@ -130,23 +130,40 @@ class GeoTiff:
             raise Exception("Not a geotiff file")
 
         store = tif.aszarr(key=band, chunkmode=2)
-        self.z = zarr.open(store, mode="r")
+        self._z = zarr.open(store, mode="r")
         store.close()
         if isinstance(crs_code, int):
             self.crs_code: int = crs_code
         else:
             self.crs_code = self._get_crs_code(tif.geotiff_metadata)
-        self.tif_shape: List[int] = self.z.shape
+        self._tif_shape: List[int] = self._z.shape
         scale: Tuple[float, float, float] = tif.geotiff_metadata["ModelPixelScale"]
         tilePoint: List[float] = tif.geotiff_metadata["ModelTiepoint"]
-        self.tifTrans: TifTransformer = TifTransformer(
-            self.tif_shape[0], self.tif_shape[1], scale, tilePoint
+        self._tifTrans: TifTransformer = TifTransformer(
+            self._tif_shape[0], self._tif_shape[1], scale, tilePoint
         )
-        self.tif_bBox: BBox = (
+        tif.close()
+    
+    @property
+    def tif_shape(self):
+        return self._tif_shape
+
+    @property
+    def tifTrans(self):
+        return self._tifTrans
+
+    @property
+    def tif_bBox(self):
+        return (
             self.tifTrans.get_xy(0, 0),
             self.tifTrans.get_xy(self.tif_shape[1], self.tif_shape[0]),
         )
-        tif.close()
+
+    @property
+    def tif_bBox_wgs_84(self) -> BBox:
+        right_top = self._convert_coords(self.crs_code, 4326, self.tif_bBox[0])
+        left_bottom = self._convert_coords(self.crs_code, 4326, self.tif_bBox[1])
+        return (right_top, left_bottom)
 
     def _get_crs_code(self, geotiff_metadata: dict) -> int:
         temp_crs_code: Optional[int] = None
@@ -164,17 +181,15 @@ class GeoTiff:
         if temp_crs_code != 32767 and isinstance(temp_crs_code, int):
             return temp_crs_code
         elif temp_crs_code == 32767:
-            raise UserDefinedGeoKeyError("Can't detect the crs. Use as_crs to manually specify it.")
+            raise UserDefinedGeoKeyError(
+                "Can't detect the crs. Use as_crs to manually specify it."
+            )
         else:
             raise GeographicTypeGeoKeyError()
 
-    def _populate_2d_array(self, i_array, j_array) -> np.ndarray:
-        return np.array(
-            [
-                np.stack((np.array(i_array), np.ones(len(i_array)) * j), axis=-1)
-                for j in j_array
-            ]
-        )
+    def _populate_2d_array(self, i_list: List[int], j_list: List[int]) -> np.ndarray:
+        stack_em = lambda li, j: np.stack((np.array(li), np.ones(len(li)) * j), axis=-1)
+        return np.array([stack_em(i_list, j) for j in j_list])
 
     def _convert_coords_array(
         self, from_crs_code: int, to_crs_code: int, i_list: List[int], j_list: List[int]
@@ -187,9 +202,7 @@ class GeoTiff:
         y_vals = xy_2d_array[:, :, 1]
         from_crs_proj4 = CRS.from_epsg(from_crs_code)
         to_crs_proj4 = CRS.from_epsg(to_crs_code)
-        transformer: Transformer = Transformer.from_crs(
-            from_crs_proj4, to_crs_proj4, always_xy=True
-        )
+        transformer = Transformer.from_crs(from_crs_proj4, to_crs_proj4, always_xy=True)
         return transformer.transform(x_vals, y_vals)
 
     def _convert_coords(
@@ -198,17 +211,15 @@ class GeoTiff:
         xx, yy = xxyy
         from_crs_proj4 = CRS.from_epsg(from_crs_code)
         to_crs_proj4 = CRS.from_epsg(to_crs_code)
-        transformer: Transformer = Transformer.from_crs(
-            from_crs_proj4, to_crs_proj4, always_xy=True
-        )
+        transformer = Transformer.from_crs(from_crs_proj4, to_crs_proj4, always_xy=True)
         return transformer.transform(xx, yy)
 
-    def _get_x_int(self, lon) -> int:
+    def _get_x_int(self, lon: float) -> int:
         x_range = self.tif_bBox[1][0] - self.tif_bBox[0][0]
         step_x: float = float(self.tif_shape[1] / x_range)
         return int(step_x * (lon - self.tif_bBox[0][0]))
 
-    def _get_y_int(self, lat) -> int:
+    def _get_y_int(self, lat: float) -> int:
         y_range = self.tif_bBox[1][1] - self.tif_bBox[0][1]
         step_y: float = self.tif_shape[0] / y_range
         return int(step_y * (lat - self.tif_bBox[0][1]))
@@ -241,11 +252,9 @@ class GeoTiff:
         x, y = self.tifTrans.get_xy(i, j)
         return self._convert_coords(self.crs_code, 4326, (x, y))
 
-    @property
-    def tif_bBox_wgs_84(self) -> BBox:
-        right_top = self._convert_coords(self.crs_code, 4326, self.tif_bBox[0])
-        left_bottom = self._convert_coords(self.crs_code, 4326, self.tif_bBox[1])
-        return (right_top, left_bottom)
+
+    
+
 
     def _check_bound_in_tiff(self, shp_bBox, b_bBox):
         check = shp_bBox[0][0] >= b_bBox[0][0]
@@ -344,9 +353,7 @@ class GeoTiff:
         return (left_top, right_bottom)
 
     def get_coord_arrays(
-        self, 
-        bBox: Optional[BBox] = None, 
-        outer_points: int = 0
+        self, bBox: Optional[BBox] = None, outer_points: int = 0
     ) -> Tuple[np.ndarray, np.ndarray]:
         """gets the 2d x coordinates and the 2d y coordinates
 
@@ -382,7 +389,7 @@ class GeoTiff:
         Returns:
             np.ndarray: zarr array of the geotiff file
         """
-        return self.z
+        return self._z
 
     def read_box(
         self, bBox: BBox, outer_points: Union[bool, int] = False
