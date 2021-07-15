@@ -116,10 +116,10 @@ class GeoTiff:
         """For representing a geotiff
 
         Args:
-            file (str): Location of the geoTiff file
+            file (str): Location of the geotiff file
             band (int): The band of the tiff file to use. Defaults to 0.
-            as_crs (Optional[int]): the epsg crs code to read the data as
-            crs_code (Optional[int]): the epsg crs code of the tiff file
+            as_crs (Optional[int]): The epsg crs code to read the data as.  Defaults to 4326 (WGS84).
+            crs_code (Optional[int]): The epsg crs code of the tiff file. Include this if the crs code can't be detected.
 
         """
         self.file = file
@@ -164,7 +164,7 @@ class GeoTiff:
         if temp_crs_code != 32767 and isinstance(temp_crs_code, int):
             return temp_crs_code
         elif temp_crs_code == 32767:
-            raise UserDefinedGeoKeyError()
+            raise UserDefinedGeoKeyError("Can't detect the crs. Use as_crs to manually specify it.")
         else:
             raise GeographicTypeGeoKeyError()
 
