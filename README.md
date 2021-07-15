@@ -84,7 +84,7 @@ geo_tiff.get_wgs_84_coords(i, j)
 
 #### Read the data
 
-To read the data, use the `.read()` method. This will return a [zarr](https://zarr.readthedocs.io/en/stable/api/core.html) array as often geotiff file cannot fit into memory.
+To read the data, use the `.read()` method. This will return a [zarr](https://zarr.readthedocs.io/en/stable/api/core.html) array as often geotiff files cannot fit into memory.
 
 ```python
 zarr_array = geo_tiff.read()
@@ -102,22 +102,22 @@ array = np.array(zarr_array)
 
 In many cases, you are only interested in a section of the tiff. For convenance, you can use the `.read_box()` method. This will return a numpy array.
 
-WARNING: This will fail if the are box you are using is too large and the data cannot fit into memory. 
+WARNING: This will fail if the box you are using is too large and the data cannot fit into memory. 
 
 ```python
 from geotiff import GeoTiff
 
 # in WGS 84
 area_box = [(138.632071411, -32.447310785), (138.644218874, -32.456979174)]
-geotiff = GeoTiff(tiff_file)
-array = geotiff.read_box(area_box)
+geo_tiff = GeoTiff(tiff_file)
+array = geo_tiff.read_box(area_box)
 ```
 
 *Note:* For the `area_box`, use the same crs as `as_crs`.
 
 In some cases, you may want some extra points/pixels around the outside of you `area_box`. This may be useful of you want to interpolate to points near the area_box boundary. To achieve this, use the `outer_points` param:
 
-array = geotiff.read_box(area_box, outer_points=2)
+array = geo_tiff.read_box(area_box, outer_points=2)
 
 This will get 2 extra perimeters of points around the outside of the the `area_box`
 
@@ -129,7 +129,7 @@ There are also some helper methods to get the bounding box of the resulting cut 
 # col and row indexes of the cut area
 int_box = geo_tiff.get_int_box(area_box)
 # lon and lat coords of the cut points/pixels
-geo_tiff.get_bBox_wgs_84(area_box)
+wgs_84_box = geo_tiff.get_bBox_wgs_84(area_box)
 ```
 
 Again, you can also get bounding box for an extra n layers of points/pixels that directly surround the `area_box`:
@@ -138,7 +138,7 @@ Again, you can also get bounding box for an extra n layers of points/pixels that
 # col and row indexes of the cut area
 int_box = geo_tiff.get_int_box(area_box, outer_points = 2)
 # lon and lat coords of the cut points/pixels
-geo_tiff.get_bBox_wgs_84(area_box, outer_points = 2)
+wgs_84_box = geo_tiff.get_bBox_wgs_84(area_box, outer_points = 2)
 ```
 
 #### Get coordinates of a point/pixel
