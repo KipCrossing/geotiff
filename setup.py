@@ -45,7 +45,7 @@ setuptools.setup(
     ],
     python_requires='>=3.7',
     install_requires=[
-        'tifffile',
+        'tifffile==2021.7.2',
         'numpy',
         'pyproj',
         'zarr',
