@@ -69,6 +69,8 @@ geo_tiff.tif_shape
 geo_tiff.tif_bBox
 # the bounding box as WGS 84
 geo_tiff.tif_bBox_wgs_84
+# the bounding box in the as_crs converted coordinates
+geo_tiff.tif_bBox_converted
 ```
 
 Get coordinates of a point/pixel
