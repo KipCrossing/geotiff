@@ -110,7 +110,7 @@ class GeoTiff:
         self,
         file: str,
         band: int = 0,
-        as_crs: int = 4326,
+        as_crs: Optional[int] = 4326,
         crs_code: Optional[int] = None,
     ):
         """For representing a geotiff
@@ -123,7 +123,7 @@ class GeoTiff:
 
         """
         self.file = file
-        self.as_crs = as_crs
+        self._as_crs = crs_code if as_crs==None else as_crs
         tif = TiffFile(self.file)
 
         if not tif.is_geotiff:
@@ -143,7 +143,11 @@ class GeoTiff:
             self._tif_shape[0], self._tif_shape[1], scale, tilePoint
         )
         tif.close()
-    
+
+    @property
+    def as_crs(self):
+        return self._as_crs
+
     @property
     def tif_shape(self):
         return self._tif_shape
@@ -252,10 +256,6 @@ class GeoTiff:
         x, y = self.tifTrans.get_xy(i, j)
         return self._convert_coords(self.crs_code, 4326, (x, y))
 
-
-    
-
-
     def _check_bound_in_tiff(self, shp_bBox, b_bBox):
         check = shp_bBox[0][0] >= b_bBox[0][0]
         check = check and (shp_bBox[1][0] <= b_bBox[1][0])
@@ -295,7 +295,7 @@ class GeoTiff:
         all_x = [left_top_c[0], left_bottom_c[0], right_bottom_c[0], right_top_c[0]]
         all_y = [left_top_c[1], left_bottom_c[1], right_bottom_c[1], right_top_c[1]]
 
-        # then get the outer ints based on
+        # then get the outer ints based on the max and mins
         x_min = min(all_x)
         y_min = min(all_y)
         x_max = max(all_x)
