@@ -117,14 +117,15 @@ To help users and and other contributes, be sure to:
 
 - [x] read tiff files (including BigTiff)
 - [ ] write tiff files (including BigTiff)
-- [x] **(UNSTABLE/LIMITED)** convert between coordinate systems
-- [ ] read a user defined CRS
+- [x] convert between epsg coordinate systems
+- [ ] read a user defined CRS `32767` from tiff file
 - [x] cut a section (bounding box) of the tiff file
 - [x] convert the data to numpy arrays
 
 #### Additional features
 
-- [ ] **(50%)** Full test coverage
+- [x] **(50%)** Full test coverage
 - [x] Typing with lint checking using mypy
+- [x] Formatted with black
 - [x] Documentation: doc blocs
 - [ ] Documentation: readthedocs
