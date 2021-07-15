@@ -22,6 +22,7 @@ if __name__ == '__main__':
     print(geo_tiff.tif_shape)
     print(geo_tiff.tif_bBox)
     print(geo_tiff.tif_bBox_wgs_84)
+    print(geo_tiff.tif_bBox_converted)
     i=5
     j=6
     print(geo_tiff.get_coords(i, j))
