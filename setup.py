@@ -49,6 +49,7 @@ setuptools.setup(
         'numpy',
         'pyproj',
         'zarr',
+        'tifftools',
     ],
     cmdclass={
         'verify': VerifyVersionCommand,
