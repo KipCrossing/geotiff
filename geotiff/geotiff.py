@@ -168,6 +168,12 @@ class GeoTiff:
         )
 
     @property
+    def tif_bBox_converted(self) -> BBox:
+        right_top = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[0])
+        left_bottom = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[1])
+        return (right_top, left_bottom)
+
+    @property
     def tif_bBox_wgs_84(self) -> BBox:
         right_top = self._convert_coords(self.crs_code, 4326, self.tif_bBox[0])
         left_bottom = self._convert_coords(self.crs_code, 4326, self.tif_bBox[1])
