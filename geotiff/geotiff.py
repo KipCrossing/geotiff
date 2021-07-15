@@ -3,7 +3,6 @@ from tifffile import imread, TiffFile  # type: ignore
 import numpy as np  # type: ignore
 from pyproj import Transformer, CRS
 import zarr  # type: ignore
-import pycrs  # type: ignore
 
 
 BBox = Tuple[Tuple[float, float], Tuple[float, float]]
@@ -186,8 +185,8 @@ class GeoTiff:
         xy_2d_array = np.apply_along_axis(get_xy, -1, ij_2d_array)
         x_vals = xy_2d_array[:, :, 0]
         y_vals = xy_2d_array[:, :, 1]
-        from_crs_proj4 = pycrs.parse.from_epsg_code(from_crs_code).to_proj4()
-        to_crs_proj4 = pycrs.parse.from_epsg_code(to_crs_code).to_proj4()
+        from_crs_proj4 = CRS.from_epsg(from_crs_code).to_proj4()
+        to_crs_proj4 = CRS.from_epsg(to_crs_code)
         transformer: Transformer = Transformer.from_crs(
             from_crs_proj4, to_crs_proj4, always_xy=True
         )
@@ -197,9 +196,6 @@ class GeoTiff:
         self, from_crs_code: int, to_crs_code: int, xxyy: Tuple[float, float]
     ) -> Tuple[float, float]:
         xx, yy = xxyy
-        # TODO remove dep on pycrs
-        # from_crs_proj4 = pycrs.parse.from_epsg_code(from_crs_code).to_proj4()
-        # to_crs_proj4 = pycrs.parse.from_epsg_code(to_crs_code).to_proj4()
         from_crs_proj4 = CRS.from_epsg(from_crs_code).to_proj4()
         to_crs_proj4 = CRS.from_epsg(to_crs_code)
         transformer: Transformer = Transformer.from_crs(

@@ -49,7 +49,6 @@ setuptools.setup(
         'numpy',
         'pyproj',
         'zarr',
-        'pycrs',
     ],
     cmdclass={
         'verify': VerifyVersionCommand,
