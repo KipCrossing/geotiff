@@ -133,9 +133,9 @@ class GeoTiff:
         self._z = zarr.open(store, mode="r")
         store.close()
         if isinstance(crs_code, int):
-            self.crs_code: int = crs_code
+            self._crs_code: int = crs_code
         else:
-            self.crs_code = self._get_crs_code(tif.geotiff_metadata)
+            self._crs_code = self._get_crs_code(tif.geotiff_metadata)
         self._tif_shape: List[int] = self._z.shape
         scale: Tuple[float, float, float] = tif.geotiff_metadata["ModelPixelScale"]
         tilePoint: List[float] = tif.geotiff_metadata["ModelTiepoint"]
@@ -143,6 +143,10 @@ class GeoTiff:
             self._tif_shape[0], self._tif_shape[1], scale, tilePoint
         )
         tif.close()
+
+    @property
+    def crs_code(self):
+        return self._crs_code
 
     @property
     def as_crs(self):
@@ -369,6 +373,7 @@ class GeoTiff:
         if bBox == None:
             i_list = [i for i in range(self.tif_shape[1])]
             j_list = [i for i in range(self.tif_shape[0])]
+            print(self.as_crs)
             return self._convert_coords_array(
                 self.crs_code, self.as_crs, i_list, j_list
             )
