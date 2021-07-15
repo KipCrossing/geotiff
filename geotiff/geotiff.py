@@ -148,7 +148,7 @@ class GeoTiff:
         )
         tif.close()
 
-    def _get_crs_code(self, geotiff_metadata: dict, guess: bool = True) -> int:
+    def _get_crs_code(self, geotiff_metadata: dict) -> int:
         temp_crs_code: Optional[int] = None
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
             temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
