@@ -7,10 +7,10 @@ import zarr
 @pytest.fixture
 def tiff_file():
     filename = "dem.tif"
+    # filename = "gda_94_sand.tif"
+    # filename = "sand_test.tif"
     dir = dir = "./tests/inputs/"
     return os.path.join(dir, filename)
-    # return "/home/kipling/Documents/fsm_sample_data/slgd/AWC_000_005_05_N_P_AU_NAT_C_20140801.tif"
-    # return "/home/kipling/Documents/fsm_sample_data/backup/red.tif"
 
 
 @pytest.fixture
