@@ -5,24 +5,46 @@ from geotiff import GeoTiff # type: ignore
 
 
 filename = "dem.tif"
-filename = "red.tif"
+# filename = "red.tif"
 dir = "./tests/inputs/"
 tiff_file = os.path.join(dir, filename)
-# tiff_file = "/home/kipling/Programs/pylandsat_sandbox/data/gamma/Radmap2019-grid-k_conc-Filtered-AWAGS_RAD_2019.tif"
-# 138.632071411 -32.447310785 138.644218874 -32.456979174
-bounding_box: List[Tuple[float, float]] = [(138.632071411, -32.447310785), (138.644218874, -32.456979174)]
+area_box: List[Tuple[float, float]] = ((138.632071411, -32.447310785), (138.644218874, -32.456979174))
 
 if __name__ == '__main__':
     print("testing read tiff")
     print(f"reading: {tiff_file}")
-    print(f"Using bBox: {bounding_box}")
-    geotiff: GeoTiff = GeoTiff(tiff_file)
-    print(geotiff.tif_bBox)
-    print(geotiff.crs_code)
-    array = geotiff.read_box(bounding_box)
-    print("Sample array:")
-    print(array)
-    print(array.shape)
-    assert isinstance(array, np.ndarray)
-    print(geotiff.tif_bBox_wgs_84)
-    print("end")
+    print(f"Using bBox: {area_box}")
+    geo_tiff: GeoTiff = GeoTiff(tiff_file, crs_code=4326, as_crs=4326,  band=0)
+
+    print()
+    print(geo_tiff.crs_code)
+    print(geo_tiff.as_crs)
+    print(geo_tiff.tif_shape)
+    print(geo_tiff.tif_bBox)
+    print(geo_tiff.tif_bBox_wgs_84)
+    i=5
+    j=6
+    print(geo_tiff.get_coords(i, j))
+    print(geo_tiff.get_wgs_84_coords(i, j))
+    zarr_array = geo_tiff.read()
+    print(zarr_array)
+    print(np.array(zarr_array))
+    array = geo_tiff.read_box(area_box)
+    int_box = geo_tiff.get_int_box(area_box)
+    print(int_box)
+    wgs_84_box = geo_tiff.get_bBox_wgs_84(area_box)
+    print(wgs_84_box)
+
+    int_box = geo_tiff.get_int_box(area_box, outer_points = 2)
+    print(int_box)
+    wgs_84_box = geo_tiff.get_bBox_wgs_84(area_box, outer_points = 2)
+    print(wgs_84_box)
+    i=int_box[0][0] + 5
+    j=int_box[0][1] + 6
+    print(geo_tiff.get_wgs_84_coords(i, j))
+    lon_array, lat_array = geo_tiff.get_coord_arrays(area_box, outer_points=2)
+    print(np.array(lon_array))
+    print(np.array(lat_array))
+    lon_array, lat_array = geo_tiff.get_coord_arrays()
+    print(np.array(lon_array))
+    print(np.array(lat_array))
