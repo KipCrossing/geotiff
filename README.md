@@ -8,7 +8,7 @@ Please support this project be giving it a [star on GitHub](https://github.com/O
 
 ### What is noGDAL?
 
-**[noGDAL](https://kipcrossing.github.io/2021-01-03-noGDAL/)** is a philosophy for developing geospatial programs in python without using GDAL.
+**[noGDAL](https://kipling.medium.com/nogdal-e5b60b114a1c)** is a philosophy for developing geospatial programs in python without using GDAL.
 
 ### Instillation
 
@@ -20,28 +20,55 @@ pip install geotiff
 
 ### Usage
 
-#### Read the GeoTiff to an array
+#### Making the GeoTiff object
 
 ```python
 from geotiff import GeoTiff
 
-geoTiff = GeoTiff(tiff_file)
-array = geoTiff.read()
+geo_tiff = GeoTiff(tiff_file)
 ```
 
 This will detect the crs code. If it's 'user defined' and you know what it should be, you may supply a crs code:
 
 ```python
-geoTiff = GeoTiff(tiff_file, crs_code=4236)
+geo_tiff = GeoTiff(tiff_file, crs_code=4326)
 ```
 
-Get bounding box info about the tiff
+By default, the coordinates will be in WGS 84, however they can be specified by using the `as_crs` param:
 
 ```python
-# in the original CRS
-geotiff.tif_bBox
-# as WGS 84
-geotiff.tif_bBox_wgs_84
+geo_tiff = GeoTiff(tiff_file, as_crs=7844)
+```
+
+Or you can use the original crs by setting `as_crs` to `None`:
+
+```python
+geo_tiff = GeoTiff(tiff_file, as_crs=None)
+```
+
+
+If the geotiff file has multiple bands, you can specify which band to use:
+
+```python
+geo_tiff = GeoTiff(tiff_file, band=1)
+```
+
+The default band is 0
+
+
+Get information (properties) about the geotiff
+
+```python
+# the original crs code
+geo_tiff.crs_code
+# the current crs code
+geo_tiff.as_crs
+# the shape of the tiff
+geo_tiff.tif_shape
+# the bounding box in the as_crs CRS
+geo_tiff.tif_bBox
+# the bounding box as WGS 84
+geo_tiff.tif_bBox_wgs_84
 ```
 
 Get coordinates of a point/pixel
@@ -49,16 +76,33 @@ Get coordinates of a point/pixel
 ```python
 i=5
 j=6
-geoTiff.get_wgs_84_coords(i, j)
+# in the as_crs coords
+geo_tiff.get_coords(i, j)
+# in WGS 84 coords
+geo_tiff.get_wgs_84_coords(i, j)
 ```
 
-Get the original crs code
+#### Read the data
+
+To read the data, use the `.read()` method. This will return a [zarr](https://zarr.readthedocs.io/en/stable/api/core.html) array as often geotiff file cannot fit into memory.
 
 ```python
-geotiff.crs_code
+zarr_array = geo_tiff.read()
 ```
 
-#### Read a sections of a large tiff using a WGS 84 area
+If you are confident that the data will fit into memory, you can convert it to an numpy array. 
+
+```python
+import numpy as np
+
+array = np.array(zarr_array)
+```
+
+#### Read a sections of a large tiff
+
+In many cases, you are only interested in a section of the tiff. For convenance, you can use the `.read_box()` method. This will return a numpy array.
+
+WARNING: This will fail if the are box you are using is too large and the data cannot fit into memory. 
 
 ```python
 from geotiff import GeoTiff
@@ -69,45 +113,71 @@ geotiff = GeoTiff(tiff_file)
 array = geotiff.read_box(area_box)
 ```
 
+*Note:* For the `area_box`, use the same crs as `as_crs`.
+
+In some cases, you may want some extra points/pixels around the outside of you `area_box`. This may be useful of you want to interpolate to points near the area_box boundary. To achieve this, use the `outer_points` param:
+
+array = geotiff.read_box(area_box, outer_points=2)
+
+This will get 2 extra perimeters of points around the outside of the the `area_box`
+
 #### Getting bounding box information
 
-You can either get the points/pixels that are within a given area_box:
+There are also some helper methods to get the bounding box of the resulting cut array:
 
 ```python
 # col and row indexes of the cut area
-int_box = geoTiff.get_int_box(area_box)
+int_box = geo_tiff.get_int_box(area_box)
 # lon and lat coords of the cut points/pixels
-geoTiff.get_bBox_wgs_84(area_box)
+geo_tiff.get_bBox_wgs_84(area_box)
 ```
 
-You can also get extra n layers of points/pixels that directly surround the area_box
+Again, you can also get bounding box for an extra n layers of points/pixels that directly surround the `area_box`:
 
 ```python
 # col and row indexes of the cut area
-int_box = geoTiff.get_int_box(area_box, outer_points = 1)
+int_box = geo_tiff.get_int_box(area_box, outer_points = 2)
 # lon and lat coords of the cut points/pixels
-geoTiff.get_bBox_wgs_84(area_box, outer_points = 1)
+geo_tiff.get_bBox_wgs_84(area_box, outer_points = 2)
 ```
-
-This may be useful of you want to interpolate to points near the area_box boundary.
 
 #### Get coordinates of a point/pixel
+
+You may want to the the coordinates of a value in your array:
 
 ```python
 i=int_box[0][0] + 5
 j=int_box[0][1] + 6
-geoTiff.get_wgs_84_coords(i, j)
+geo_tiff.get_wgs_84_coords(i, j)
+```
+
+#### Get coordinates of an array
+
+You may want to simply get all the coordinates in the array:
+
+```python
+array = geo_tiff.read_box(area_box, outer_points=2)
+lon_array, lat_array = geo_tiff.get_coord_arrays(area_box, outer_points=2)
+```
+
+The will return two arrays that are in the same shape as the array form the `read_box()` method. The output coords will be in the `as_crs` crs. 
+
+If your tiff file is small and can fit into memory, simply:
+
+```python
+lon_array, lat_array = geo_tiff.get_coord_arrays()
 ```
 
 ### Contributing
 
-If you would like to contribute to this project, please fork it and make a PR with you patches.
+If you would like to contribute to this project, please fork this repo and make a PR with you patches.
 
 You can join the conversation by saying hi in the [project discussion board](https://github.com/Open-Source-Agriculture/geotiff/discussions).
 
 To help users and and other contributes, be sure to:
 - make doc blocs if appropriate
 - use typing wherever possible. 
+- format with black
 
 *Note:* The continuous integration has lint checking with **mypy**, so be sure to check it yourself before making a PR.
 
