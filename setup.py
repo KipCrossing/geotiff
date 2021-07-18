@@ -1,9 +1,9 @@
-import setuptools
+import setuptools # type: ignore
 import os
 import sys
-from setuptools.command.install import install
+from setuptools.command.install import install # type: ignore
 
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 # Send to pypi
 # python3 setup.py sdist bdist_wheel
