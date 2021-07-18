@@ -31,10 +31,15 @@ def test_read_box(area_box, geo_tiff: GeoTiff):
     print(f"crs_code: {geo_tiff.crs_code}")
     print(f"as_crs: {geo_tiff.as_crs}")
     array = geo_tiff.read_box(area_box)
+    assert isinstance(array, np.ndarray)
     print("Sample array:")
     print(array)
     print(array.shape)
     assert isinstance(array, np.ndarray)
+    zarr_array = geo_tiff.read_box(area_box, aszarr=True)
+    print(type(zarr_array))
+    assert isinstance(zarr_array, zarr.Array)
+
 
 def test_get_coord_arrays(geo_tiff: GeoTiff, area_box):
     array = geo_tiff.read_box(area_box)

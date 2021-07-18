@@ -31,6 +31,7 @@ if __name__ == '__main__':
     print(zarr_array)
     print(np.array(zarr_array))
     array = geo_tiff.read_box(area_box)
+    small_zarr_array = geo_tiff.read_box(area_box, aszarr=True)
     int_box = geo_tiff.get_int_box(area_box)
     print(int_box)
     wgs_84_box = geo_tiff.get_bBox_wgs_84(area_box)

@@ -395,7 +395,7 @@ class GeoTiff:
         raise TypeError(f"You must supply a valid bBox. You gave: {bBox}")
 
     def read(self) -> zarr.Array:
-        """Reade the contents of the geotiff to a zarr array
+        """Reads the contents of the geotiff to a zarr array
 
         Returns:
             np.ndarray: zarr array of the geotiff file
@@ -403,13 +403,19 @@ class GeoTiff:
         return self._z
 
     def read_box(
-        self, bBox: BBox, outer_points: Union[bool, int] = False
-    ) -> np.ndarray:
-        """[summary]
+        self, 
+        bBox: BBox, 
+        outer_points: Union[bool, int] = False,
+        aszarr: bool = False,
+    ) -> Union[np.ndarray, zarr.Array]:
+        """Reads a boxed sections of the geotiff to a zarr/numpy array
 
         Args:
             bBox (BBox): A bounding box
             outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
+            safe (bool): If True, returns a zarr array. If False, forces a returns as a numpy array by putting the data into memory.  Defaults to False.
+
+        
 
         Returns:
             np.ndarray: zarr array of the geotiff file
@@ -418,5 +424,7 @@ class GeoTiff:
             bBox, outer_points=outer_points
         )
         tiff_array = self.read()
-        cut_tif_array: np.ndarray = np.array(tiff_array[y_min:y_max, x_min:x_max])
-        return cut_tif_array
+        boxed_array = tiff_array[y_min:y_max, x_min:x_max]
+        if aszarr:
+            return zarr.array(boxed_array)
+        return np.array(boxed_array)
