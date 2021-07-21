@@ -129,7 +129,7 @@ class GeoTiff:
         if not tif.is_geotiff:
             raise Exception("Not a geotiff file")
 
-        store = tif.aszarr(key=band, chunkmode=2)
+        store = tif.aszarr(key=band)
         self._z = zarr.open(store, mode="r")
         store.close()
         if isinstance(crs_code, int):
