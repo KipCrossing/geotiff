@@ -182,7 +182,11 @@ class GeoTiff:
     def _get_crs_code(self, geotiff_metadata: dict) -> int:
         temp_crs_code: Optional[int] = None
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
-            temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
+            if hasattr(geotiff_metadata["ProjectedCSTypeGeoKey"], 'value'):
+                temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
+            else
+                # In the event that it's already an int.
+                temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"]
             # TODO
             # if the ProjectedCSTypeGeoKey is user defined (32767)
             # use supplied keys to get the datum and define the CRS
