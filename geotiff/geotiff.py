@@ -184,7 +184,7 @@ class GeoTiff:
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
             if hasattr(geotiff_metadata["ProjectedCSTypeGeoKey"], 'value'):
                 temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
-            else
+            else:
                 # In the event that it's already an int.
                 temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"]
             # TODO
