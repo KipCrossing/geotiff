@@ -32,7 +32,6 @@ setuptools.setup(
     install_requires=[
         "tifffile==2021.7.2",
         "numpy",
-        "pyproj",
         "zarr",
     ],
     cmdclass={},
