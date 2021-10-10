@@ -1,7 +1,6 @@
-from typing import List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 from tifffile import imread, TiffFile  # type: ignore
 import numpy as np  # type: ignore
-from pyproj import Transformer, CRS
 import zarr  # type: ignore
 
 
@@ -110,20 +109,26 @@ class GeoTiff:
         self,
         file: str,
         band: int = 0,
-        as_crs: Optional[int] = 4326,
         crs_code: Optional[int] = None,
+        transformer: Optional[Callable] = None,
+        as_crs: Optional[int] = None,
     ):
         """For representing a geotiff
 
         Args:
             file (str): Location of the geotiff file
             band (int): The band of the tiff file to use. Defaults to 0.
-            as_crs (Optional[int]): The epsg crs code to read the data as.  Defaults to 4326 (WGS84).
             crs_code (Optional[int]): The epsg crs code of the tiff file. Include this if the crs code can't be detected.
+            transformer (Optional[Callable]): Depreciated
+            as_crs (Optional[int]): Depreciated
 
         """
         self.file = file
-        self._as_crs = crs_code if as_crs==None else as_crs
+        self.transformer = transformer
+        if isinstance(as_crs, int):
+            raise DeprecationWarning(
+                "as_crs is no longer implimented. See the transformer param."
+            )
         tif = TiffFile(self.file)
 
         if not tif.is_geotiff:
@@ -132,6 +137,7 @@ class GeoTiff:
         store = tif.aszarr(key=band)
         self._z = zarr.open(store, mode="r")
         store.close()
+
         if isinstance(crs_code, int):
             self._crs_code: int = crs_code
         else:
@@ -142,6 +148,7 @@ class GeoTiff:
         self._tifTrans: TifTransformer = TifTransformer(
             self._tif_shape[0], self._tif_shape[1], scale, tilePoint
         )
+
         tif.close()
 
     @property
@@ -167,22 +174,10 @@ class GeoTiff:
             self.tifTrans.get_xy(self.tif_shape[1], self.tif_shape[0]),
         )
 
-    @property
-    def tif_bBox_converted(self) -> BBox:
-        right_top = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[0])
-        left_bottom = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[1])
-        return (right_top, left_bottom)
-
-    @property
-    def tif_bBox_wgs_84(self) -> BBox:
-        right_top = self._convert_coords(self.crs_code, 4326, self.tif_bBox[0])
-        left_bottom = self._convert_coords(self.crs_code, 4326, self.tif_bBox[1])
-        return (right_top, left_bottom)
-
     def _get_crs_code(self, geotiff_metadata: dict) -> int:
         temp_crs_code: Optional[int] = None
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
-            if hasattr(geotiff_metadata["ProjectedCSTypeGeoKey"], 'value'):
+            if hasattr(geotiff_metadata["ProjectedCSTypeGeoKey"], "value"):
                 temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
             else:
                 # In the event that it's already an int.
@@ -209,29 +204,6 @@ class GeoTiff:
         stack_em = lambda li, j: np.stack((np.array(li), np.ones(len(li)) * j), axis=-1)
         return np.array([stack_em(i_list, j) for j in j_list])
 
-    def _convert_coords_array(
-        self, from_crs_code: int, to_crs_code: int, i_list: List[int], j_list: List[int]
-    ):
-        ij_2d_array = self._populate_2d_array(i_list, j_list)
-        # convert to x_vals and y_vals via tiffTransformer
-        get_xy = lambda e: np.array(list(self.tifTrans.get_xy(e[0], e[1])))
-        xy_2d_array = np.apply_along_axis(get_xy, -1, ij_2d_array)
-        x_vals = xy_2d_array[:, :, 0]
-        y_vals = xy_2d_array[:, :, 1]
-        from_crs_proj4 = CRS.from_epsg(from_crs_code)
-        to_crs_proj4 = CRS.from_epsg(to_crs_code)
-        transformer = Transformer.from_crs(from_crs_proj4, to_crs_proj4, always_xy=True)
-        return transformer.transform(x_vals, y_vals)
-
-    def _convert_coords(
-        self, from_crs_code: int, to_crs_code: int, xxyy: Tuple[float, float]
-    ) -> Tuple[float, float]:
-        xx, yy = xxyy
-        from_crs_proj4 = CRS.from_epsg(from_crs_code)
-        to_crs_proj4 = CRS.from_epsg(to_crs_code)
-        transformer = Transformer.from_crs(from_crs_proj4, to_crs_proj4, always_xy=True)
-        return transformer.transform(xx, yy)
-
     def _get_x_int(self, lon: float) -> int:
         x_range = self.tif_bBox[1][0] - self.tif_bBox[0][0]
         step_x: float = float(self.tif_shape[1] / x_range)
@@ -253,22 +225,7 @@ class GeoTiff:
         Returns:
             Tuple[float, float]: lon, lat
         """
-        x, y = self.tifTrans.get_xy(i, j)
-        return self._convert_coords(self.crs_code, self.as_crs, (x, y))
-
-    def get_wgs_84_coords(self, i: int, j: int) -> Tuple[float, float]:
-        """for a given i, j in the entire tiff array,
-        returns the wgs_84 coordinates
-
-        Args:
-            i (int): col number of the array
-            j (int): row number of the array
-
-        Returns:
-            Tuple[float, float]: lon, lat
-        """
-        x, y = self.tifTrans.get_xy(i, j)
-        return self._convert_coords(self.crs_code, 4326, (x, y))
+        return self.tifTrans.get_xy(i, j)
 
     def _check_bound_in_tiff(self, shp_bBox, b_bBox):
         check = shp_bBox[0][0] >= b_bBox[0][0]
@@ -301,13 +258,8 @@ class GeoTiff:
         left_bottom = (bBox[0][0], bBox[1][1])
         right_top = (bBox[1][0], bBox[0][1])
 
-        left_top_c = self._convert_coords(self.as_crs, self.crs_code, left_top)
-        right_bottom_c = self._convert_coords(self.as_crs, self.crs_code, right_bottom)
-        left_bottom_c = self._convert_coords(self.as_crs, self.crs_code, left_bottom)
-        right_top_c = self._convert_coords(self.as_crs, self.crs_code, right_top)
-
-        all_x = [left_top_c[0], left_bottom_c[0], right_bottom_c[0], right_top_c[0]]
-        all_y = [left_top_c[1], left_bottom_c[1], right_bottom_c[1], right_top_c[1]]
+        all_x = [left_top[0], left_bottom[0], right_bottom[0], right_top[0]]
+        all_y = [left_top[1], left_bottom[1], right_bottom[1], right_top[1]]
 
         # then get the outer ints based on the max and mins
         x_min = min(all_x)
@@ -348,24 +300,6 @@ class GeoTiff:
         self._check_bound_in_tiff(shp_bBox, ((x_min, y_max), (x_max, y_min)))
         return ((i_min, j_min), (i_max, j_max))
 
-    def get_bBox_wgs_84(
-        self, bBox: BBox, outer_points: Union[bool, int] = False
-    ) -> BBox:
-        """takes a bounding area gets the coordinates of the extremities
-        as if they were clipped by that bounding area
-
-        Args:
-            bBox (BBox): bounding box area to clip within (wgs_84)
-            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
-
-        Returns:
-            BBox: in wgs_84
-        """
-        b = self.get_int_box(bBox, outer_points=outer_points)
-        left_top = self.get_wgs_84_coords(b[0][0], b[0][1])
-        right_bottom = self.get_wgs_84_coords(b[1][0], b[1][1])
-        return (left_top, right_bottom)
-
     def get_coord_arrays(
         self, bBox: Optional[BBox] = None, outer_points: int = 0
     ) -> Tuple[np.ndarray, np.ndarray]:
@@ -383,19 +317,16 @@ class GeoTiff:
         if bBox == None:
             i_list = [i for i in range(self.tif_shape[1])]
             j_list = [i for i in range(self.tif_shape[0])]
-            print(self.as_crs)
-            return self._convert_coords_array(
-                self.crs_code, self.as_crs, i_list, j_list
-            )
+            coord_array = self._populate_2d_array(i_list, j_list)
+            return coord_array[:, :, 0], coord_array[:, :, 1]
         elif isinstance(bBox, tuple):
             ((x_min, y_min), (x_max, y_max)) = self.get_int_box(
                 bBox, outer_points=outer_points
             )
             i_list = [i for i in range(x_min, x_max)]
             j_list = [i for i in range(y_min, y_max)]
-            return self._convert_coords_array(
-                self.crs_code, self.as_crs, i_list, j_list
-            )
+            coord_array = self._populate_2d_array(i_list, j_list)
+            return coord_array[:, :, 0], coord_array[:, :, 1]
         raise TypeError(f"You must supply a valid bBox. You gave: {bBox}")
 
     def read(self) -> zarr.Array:
@@ -407,8 +338,8 @@ class GeoTiff:
         return self._z
 
     def read_box(
-        self, 
-        bBox: BBox, 
+        self,
+        bBox: BBox,
         outer_points: Union[bool, int] = False,
         aszarr: bool = False,
     ) -> Union[np.ndarray, zarr.Array]:
@@ -419,7 +350,7 @@ class GeoTiff:
             outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
             safe (bool): If True, returns a zarr array. If False, forces a returns as a numpy array by putting the data into memory.  Defaults to False.
 
-        
+
 
         Returns:
             np.ndarray: zarr array of the geotiff file
