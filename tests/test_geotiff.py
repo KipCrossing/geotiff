@@ -6,7 +6,7 @@ from geotiff import GeoTiff
 import zarr  # type: ignore
 
 
-@pytest.fixture(params=["dem.tif"])  # , "gda_94_sand.tif", "sand_test.tif", "red.tif"])
+@pytest.fixture(params=["dem.tif", "gda_94_sand.tif", "sand_test.tif"])  # , "red.tif"
 def geo_tiff(request):
     filename = request.param
     dir = dir = "./tests/inputs/"
