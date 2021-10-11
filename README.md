@@ -10,7 +10,7 @@ Please support this project be giving it a [star on GitHub](https://github.com/O
 
 **[noGDAL](https://kipling.medium.com/nogdal-e5b60b114a1c)** is a philosophy for developing geospatial programs in python without using GDAL.
 
-### Instillation
+### Installation
 
 Installing this package is as easy as:
 
