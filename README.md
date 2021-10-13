@@ -102,7 +102,7 @@ array = np.array(zarr_array)
 
 #### Read a sections of a large tiff
 
-In many cases, you are only interested in a section of the tiff. For convenance, you can use the `.read_box()` method. This will return a numpy array.
+In many cases, you are only interested in a section of the tiff. For convenience, you can use the `.read_box()` method. This will return a numpy array.
 
 WARNING: This will fail if the box you are using is too large and the data cannot fit into memory. 
 
@@ -162,7 +162,7 @@ array = geo_tiff.read_box(area_box, outer_points=2)
 lon_array, lat_array = geo_tiff.get_coord_arrays(area_box, outer_points=2)
 ```
 
-The will return two arrays that are in the same shape as the array form the `read_box()` method. The output coords will be in the `as_crs` crs. 
+The will return two arrays that are in the same shape as the array from the `read_box()` method. The output coords will be in the `as_crs` crs. 
 
 If your tiff file is small and can fit into memory, simply:
 
@@ -172,7 +172,7 @@ lon_array, lat_array = geo_tiff.get_coord_arrays()
 
 ### Contributing
 
-If you would like to contribute to this project, please fork this repo and make a PR with you patches.
+If you would like to contribute to this project, please fork this repo and make a PR with your patches.
 
 You can join the conversation by saying hi in the [project discussion board](https://github.com/KipCrossing/geotiff/discussions).
 
