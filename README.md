@@ -56,7 +56,7 @@ geo_tiff = GeoTiff(tiff_file, band=1)
 The default band is 0
 
 
-Get information (properties) about the geotiff
+Get information (properties) about the geotiff:
 
 ```python
 # the original crs code
@@ -73,7 +73,7 @@ geo_tiff.tif_bBox_wgs_84
 geo_tiff.tif_bBox_converted
 ```
 
-Get coordinates of a point/pixel
+Get coordinates of a point/pixel:
 
 ```python
 i=5
@@ -92,7 +92,7 @@ To read the data, use the `.read()` method. This will return a [zarr](https://za
 zarr_array = geo_tiff.read()
 ```
 
-If you are confident that the data will fit into memory, you can convert it to an numpy array. 
+If you are confident that the data will fit into memory, you can convert it to a numpy array:
 
 ```python
 import numpy as np
@@ -100,7 +100,7 @@ import numpy as np
 array = np.array(zarr_array)
 ```
 
-#### Read a sections of a large tiff
+#### Read a section of a large tiff
 
 In many cases, you are only interested in a section of the tiff. For convenience, you can use the `.read_box()` method. This will return a numpy array.
 
@@ -117,11 +117,11 @@ array = geo_tiff.read_box(area_box)
 
 *Note:* For the `area_box`, use the same crs as `as_crs`.
 
-In some cases, you may want some extra points/pixels around the outside of you `area_box`. This may be useful of you want to interpolate to points near the area_box boundary. To achieve this, use the `outer_points` param:
+In some cases, you may want some extra points/pixels around the outside of your `area_box`. This may be useful if you want to interpolate to points near the area_box boundary. To achieve this, use the `outer_points` param:
 
 array = geo_tiff.read_box(area_box, outer_points=2)
 
-This will get 2 extra perimeters of points around the outside of the the `area_box`
+This will get 2 extra perimeters of points around the outside of the the `area_box`.
 
 #### Getting bounding box information
 
@@ -145,7 +145,7 @@ wgs_84_box = geo_tiff.get_bBox_wgs_84(area_box, outer_points = 2)
 
 #### Get coordinates of a point/pixel
 
-You may want to the the coordinates of a value in your array:
+You may want to get the coordinates of a value in your array:
 
 ```python
 i=int_box[0][0] + 5
@@ -162,7 +162,7 @@ array = geo_tiff.read_box(area_box, outer_points=2)
 lon_array, lat_array = geo_tiff.get_coord_arrays(area_box, outer_points=2)
 ```
 
-The will return two arrays that are in the same shape as the array from the `read_box()` method. The output coords will be in the `as_crs` crs. 
+This will return two arrays that are in the same shape as the array from the `read_box()` method. The output coords will be in the `as_crs` crs. 
 
 If your tiff file is small and can fit into memory, simply:
 
@@ -176,9 +176,9 @@ If you would like to contribute to this project, please fork this repo and make 
 
 You can join the conversation by saying hi in the [project discussion board](https://github.com/KipCrossing/geotiff/discussions).
 
-To help users and and other contributes, be sure to:
+To help users and other contributes, be sure to:
 - make doc blocs if appropriate
-- use typing wherever possible. 
+- use typing wherever possible
 - format with black
 
 *Note:* The continuous integration has lint checking with **mypy**, so be sure to check it yourself before making a PR.
