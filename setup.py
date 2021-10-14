@@ -1,9 +1,9 @@
-import setuptools # type: ignore
+import setuptools  # type: ignore
 import os
 import sys
-from setuptools.command.install import install # type: ignore
+from setuptools.command.install import install  # type: ignore
 
-VERSION = "0.2.3"
+VERSION = "0.3a1"
 
 # Send to pypi
 # python3 setup.py sdist bdist_wheel
@@ -12,21 +12,6 @@ VERSION = "0.2.3"
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-class VerifyVersionCommand(install):
-    """Custom command to verify that the git tag matches our version"""
-    description = 'verify that the git tag matches our version'
-
-    def run(self):
-        tag = os.getenv('CIRCLE_TAG')
-
-        if tag == None:
-            info = "No new version to upload"
-            print(info)
-        elif tag != VERSION:
-            info = "Git tag: {0} does not match the version of this app: {1}".format(
-                tag, VERSION
-            )
-            sys.exit(info)
 
 setuptools.setup(
     name="geotiff",
@@ -43,14 +28,11 @@ setuptools.setup(
         "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7',
+    python_requires=">=3.7",
     install_requires=[
-        'tifffile==2021.7.2',
-        'numpy',
-        'pyproj',
-        'zarr',
+        "tifffile==2021.7.2",
+        "numpy",
+        "zarr",
     ],
-    cmdclass={
-        'verify': VerifyVersionCommand,
-    }
+    cmdclass={},
 )
