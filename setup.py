@@ -52,8 +52,6 @@ setup(
     description="A noGDAL tool for reading and writing geotiff files",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    license_files=("LICENSE.txt",),
-    cmdclass={"egg_info": egg_info_ex},
     url="https://github.com/Open-Source-Agriculture/geotiff",
     packages=find_packages(),
     classifiers=[
@@ -68,7 +66,6 @@ setup(
         "pyproj",
         "zarr",
     ],
-    cmdclass={
-        "verify": VerifyVersionCommand,
-    },
+    license_files=("LICENSE.txt",),
+    cmdclass={"verify": VerifyVersionCommand, "egg_info": egg_info_ex},
 )
