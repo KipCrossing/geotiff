@@ -15,35 +15,6 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 
-class VerifyVersionCommand(install):
-    """Custom command to verify that the git tag matches our version"""
-
-    description = "verify that the git tag matches our version"
-
-    def run(self):
-        tag = os.getenv("CIRCLE_TAG")
-
-        if tag == None:
-            info = "No new version to upload"
-            print(info)
-        elif tag != VERSION:
-            info = "Git tag: {0} does not match the version of this app: {1}".format(
-                tag, VERSION
-            )
-            sys.exit(info)
-
-
-class egg_info_ex(egg_info):
-    """Includes license file into `.egg-info` folder."""
-
-    def run(self):
-        # don't duplicate license into `.egg-info` when building a distribution
-        if not self.distribution.have_run.get("install", True):
-            # `install` command is in progress, copy license
-            self.mkpath(self.egg_info)
-            self.copy_file("LICENSE.txt", self.egg_info)
-
-
 setup(
     name="geotiff",
     version=VERSION,
@@ -67,5 +38,5 @@ setup(
         "zarr",
     ],
     license_files=("LICENSE",),
-    cmdclass={"verify": VerifyVersionCommand, "egg_info": egg_info_ex},
+    # cmdclass={"egg_info": egg_info_ex},
 )
