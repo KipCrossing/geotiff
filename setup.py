@@ -66,6 +66,6 @@ setup(
         "pyproj",
         "zarr",
     ],
-    license_files=("LICENSE.txt",),
+    license_files=("LICENSE",),
     cmdclass={"verify": VerifyVersionCommand, "egg_info": egg_info_ex},
 )
