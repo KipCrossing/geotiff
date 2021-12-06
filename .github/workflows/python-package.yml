@@ -35,3 +35,4 @@ jobs:
     - name: Check typing with mypy
       run: |
         mypy geotiff
+        mypy setup.py
