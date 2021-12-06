@@ -5,7 +5,7 @@ from setuptools import setup, find_packages  # type: ignore
 from setuptools.command.egg_info import egg_info  # type: ignore
 
 
-VERSION = "0.2.3"
+VERSION = "0.2.4"
 
 # Send to pypi
 # python3 setup.py sdist bdist_wheel
