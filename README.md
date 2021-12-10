@@ -18,6 +18,12 @@ Installing this package is as easy as:
 pip install geotiff
 ```
 
+There is also an Anaconda-based package available, published on [conda-forge](https://conda-forge.org/):
+
+```
+conda install -c conda-forge python-geotiff 
+```
+
 ### Usage
 
 #### Making the GeoTiff object
