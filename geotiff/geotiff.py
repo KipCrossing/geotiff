@@ -383,7 +383,6 @@ class GeoTiff:
         if bBox == None:
             i_list = [i for i in range(self.tif_shape[1])]
             j_list = [i for i in range(self.tif_shape[0])]
-            print(self.as_crs)
             return self._convert_coords_array(
                 self.crs_code, self.as_crs, i_list, j_list
             )
