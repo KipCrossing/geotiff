@@ -35,7 +35,7 @@ setup(
         "tifffile==2021.7.2",
         "numpy",
         "pyproj",
-        "zarr",
+        "zarr==2.10.*",
     ],
     license_files=("LICENSE",),
     # cmdclass={"egg_info": egg_info_ex},
