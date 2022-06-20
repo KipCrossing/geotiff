@@ -5,7 +5,7 @@ from setuptools import setup, find_packages  # type: ignore
 from setuptools.command.egg_info import egg_info  # type: ignore
 
 
-VERSION = "0.2.4"
+VERSION = "0.2.5"
 
 # Send to pypi
 # python3 setup.py sdist bdist_wheel
@@ -35,7 +35,7 @@ setup(
         "tifffile==2021.7.2",
         "numpy",
         "pyproj",
-        "zarr",
+        "zarr==2.10.*",
     ],
     license_files=("LICENSE",),
     # cmdclass={"egg_info": egg_info_ex},
