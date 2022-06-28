@@ -1,5 +1,4 @@
-pytest
-tifffile==2021.7.2
+tifffile>=2021.7.2
 numpy
 pyproj
-zarr==2.10.*
+zarr>=2.10.*
