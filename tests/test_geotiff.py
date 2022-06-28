@@ -1,16 +1,16 @@
-from typing import Callable
 import numpy as np  # type: ignore
 import pytest
 import os
 from geotiff import GeoTiff
 import zarr  # type: ignore
 
-@pytest.fixture(params=["dem.tif", "gda_94_sand.tif",  "sand_test.tif", "red.tif"])
+
+@pytest.fixture(params=["dem.tif", "gda_94_sand.tif", "sand_test.tif", "red.tif"])
 def geo_tiff(request):
-    filename = request.param 
+    filename = request.param
     dir = dir = "./tests/inputs/"
     # TODO: test bands, and crs params
-    return GeoTiff(os.path.join(dir, filename)) 
+    return GeoTiff(os.path.join(dir, filename))
 
 
 @pytest.fixture
@@ -23,6 +23,7 @@ def test_read(geo_tiff: GeoTiff):
     print(zarr_array.info)
     assert isinstance(zarr_array, zarr.Array)
     print(zarr_array.chunks)
+
 
 def test_read_box(area_box, geo_tiff: GeoTiff):
     print("testing read tiff")
@@ -56,11 +57,10 @@ def test_int_box(area_box, geo_tiff: GeoTiff):
     assert isinstance(intBox[0], tuple)
     assert isinstance(intBox[1], tuple)
     intBox_outer = geo_tiff.get_int_box(area_box, outer_points=True)
-    assert intBox[0][0] == intBox_outer[0][0]+1
-    assert intBox[0][1] == intBox_outer[0][1]+1
-    assert intBox[1][0] == intBox_outer[1][0]-1
-    assert intBox[1][1] == intBox_outer[1][1]-1
-
+    assert intBox[0][0] == intBox_outer[0][0] + 1
+    assert intBox[0][1] == intBox_outer[0][1] + 1
+    assert intBox[1][0] == intBox_outer[1][0] - 1
+    assert intBox[1][1] == intBox_outer[1][1] - 1
 
 
 def test_conversions(area_box, geo_tiff: GeoTiff):

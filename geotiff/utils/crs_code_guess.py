@@ -43,4 +43,4 @@ def crs_code_gusser(GTCitationGeo: str) -> Tuple[int, float]:
             crs_key = crs
             crs_code = all_crs[crs_key]
 
-    return (crs_code, best_score)
+    return crs_code, best_score
