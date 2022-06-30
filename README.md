@@ -24,6 +24,14 @@ There is also an Anaconda-based package available, published on [conda-forge](ht
 conda install -c conda-forge python-geotiff 
 ```
 
+For local development from sources, you can install geotiff with its development requirements using:
+
+```
+git clone git@github.com:KipCrossing/geotiff.git
+cd geotiff
+pip install -e .[dev]
+```
+
 ### Usage
 
 #### Making the GeoTiff object
