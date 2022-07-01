@@ -6,7 +6,7 @@ You can join the conversation by saying hi in the [project discussion board](htt
 
 To help users and other contributes, be sure to:
 - make doc blocs if appropriate
-- use typing wherever possible. 
+- use typing wherever possible.
 - format with black
 
 *Note:* The continuous integration has lint checking with **mypy**, so be sure to check it yourself before making a PR.

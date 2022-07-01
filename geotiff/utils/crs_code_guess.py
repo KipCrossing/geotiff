@@ -1,6 +1,15 @@
-from tifffile.tifffile_geodb import Proj, GCSE, PCS, GCS, Ellipse, DatumE, Datum  # type: ignore
-from typing import List, Tuple
 from difflib import SequenceMatcher
+from typing import List, Tuple
+
+from tifffile.tifffile_geodb import (  # type: ignore
+    GCS,
+    GCSE,
+    PCS,
+    Datum,
+    DatumE,
+    Ellipse,
+    Proj,
+)
 
 PreDict = List[Tuple[str, int]]
 
@@ -20,22 +29,20 @@ def crs_code_gusser(GTCitationGeo: str) -> Tuple[int, float]:
     pcss: PreDict = [(name, member.value) for name, member in PCS.__members__.items()]
     gcse: PreDict = [(name, member.value) for name, member in GCSE.__members__.items()]
     gcs: PreDict = [(name, member.value) for name, member in GCS.__members__.items()]
-    # TODO
-    # ! handel these!
-    ellipse: PreDict = [
+    # TODO: Handle these conditions
+    ellipse: PreDict = [  # noqa
         (name, member.value) for name, member in Ellipse.__members__.items()
     ]
-    datumE: PreDict = [
+    datumE: PreDict = [  # noqa
         (name, member.value) for name, member in DatumE.__members__.items()
     ]
-    datum: PreDict = [
+    datum: PreDict = [  # noqa
         (name, member.value) for name, member in Datum.__members__.items()
     ]
     all_crs = dict(projs + pcss + gcse + gcs)  # + ellipse + datumE + datum)
     # takes a guess based on the GTCitationGeoKey
     info_str: str = GTCitationGeo
     best_score: float = 0.0
-    crs_key: str = ""
     for crs in all_crs.keys():
         score: float = SequenceMatcher(None, info_str, str(crs)).ratio()
         if score > best_score:

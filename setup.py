@@ -1,7 +1,6 @@
-from setuptools.command.install import install  # type: ignore
-from setuptools import setup, find_packages  # type: ignore
+from setuptools import find_packages, setup  # type: ignore
 from setuptools.command.egg_info import egg_info  # type: ignore
-
+from setuptools.command.install import install  # type: ignore
 
 VERSION = "0.2.6"
 
@@ -9,11 +8,11 @@ VERSION = "0.2.6"
 # python3 setup.py sdist bdist_wheel
 # twine upload dist/*
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("README.md", encoding="utf-8") as fh:
     long_description = fh.read()
 
 requirements = []
-with open("requirements.txt", "r", encoding="utf-8") as fh:
+with open("requirements.txt", encoding="utf-8") as fh:
     for dep in fh.readlines():
         requirements.append(dep)
 

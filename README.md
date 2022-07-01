@@ -2,7 +2,7 @@
 
 A noGDAL tool for reading geotiff files
 
-WARNING this package is under development and some features are unstable. Use with caution. 
+WARNING this package is under development and some features are unstable. Use with caution.
 
 Please support this project be giving it a [star on GitHub](https://github.com/Open-Source-Agriculture/geotiff)!
 
@@ -21,7 +21,7 @@ pip install geotiff
 There is also an Anaconda-based package available, published on [conda-forge](https://conda-forge.org/):
 
 ```
-conda install -c conda-forge python-geotiff 
+conda install -c conda-forge python-geotiff
 ```
 
 For local development from sources, you can install geotiff with its development requirements using:
@@ -118,7 +118,7 @@ array = np.array(zarr_array)
 
 In many cases, you are only interested in a section of the tiff. For convenience, you can use the `.read_box()` method. This will return a numpy array.
 
-WARNING: This will fail if the box you are using is too large and the data cannot fit into memory. 
+WARNING: This will fail if the box you are using is too large and the data cannot fit into memory.
 
 ```python
 from geotiff import GeoTiff
@@ -176,7 +176,7 @@ array = geo_tiff.read_box(area_box, outer_points=2)
 lon_array, lat_array = geo_tiff.get_coord_arrays(area_box, outer_points=2)
 ```
 
-This will return two arrays that are in the same shape as the array from the `read_box()` method. The output coords will be in the `as_crs` crs. 
+This will return two arrays that are in the same shape as the array from the `read_box()` method. The output coords will be in the `as_crs` crs.
 
 If your tiff file is small and can fit into memory, simply:
 

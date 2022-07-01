@@ -1,8 +1,10 @@
+import os
+
 import numpy as np  # type: ignore
 import pytest
-import os
-from geotiff import GeoTiff
 import zarr  # type: ignore
+
+from geotiff import GeoTiff
 
 
 @pytest.fixture(params=["dem.tif", "gda_94_sand.tif", "sand_test.tif", "red.tif"])
@@ -68,9 +70,9 @@ def test_conversions(area_box, geo_tiff: GeoTiff):
     i = int_box[0][0] + 5
     j = int_box[0][1] + 6
     geo_tiff.get_wgs_84_coords(i, j)
-    bounding_box = geo_tiff.get_bBox_wgs_84(area_box)
 
-    # * note: these tests will fail when the tiff it skewed
+    # * note: these tests will fail when the tiff is skewed
+    # bounding_box = geo_tiff.get_bBox_wgs_84(area_box)
     # assert area_box[0][0] <= bounding_box[0][0]
     # assert area_box[0][1] >= bounding_box[0][1]
     # assert area_box[1][0] >= bounding_box[1][0]
