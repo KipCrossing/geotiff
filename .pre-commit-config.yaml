@@ -29,11 +29,12 @@ repos:
     hooks:
       - id: isort
         args: [ "--settings-file=setup.cfg" ]
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.1.1
-    hooks:
-      - id: pydocstyle
-        args: [ '--config=setup.cfg' ]
+# TODO: Requires significant changes
+#  - repo: https://github.com/pycqa/pydocstyle
+#    rev: 6.1.1
+#    hooks:
+#      - id: pydocstyle
+#        args: [ '--config=setup.cfg' ]
   - repo: https://github.com/keewis/blackdoc
     rev: v0.3.4
     hooks:
@@ -43,10 +44,11 @@ repos:
     rev: v1.3.0
     hooks:
       - id: yesqa
-  - repo: https://github.com/mgedmin/check-manifest
-    rev: "0.48"
-    hooks:
-      - id: check-manifest
+# TODO: Requires a MANIFEST.in file
+#  - repo: https://github.com/mgedmin/check-manifest
+#    rev: "0.48"
+#    hooks:
+#      - id: check-manifest
   - repo: meta
     hooks:
       - id: check-hooks-apply
