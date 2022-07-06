@@ -2,6 +2,7 @@ include AUTHORS.md
 include LICENSE
 include README.md
 include requirements.txt
+include example.py
 
 recursive-include geotiff *.py
 recursive-include docs *.md
@@ -9,3 +10,5 @@ recursive-include tests *.py *.tif
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
+
+exclude .pre-commit-config.yaml

@@ -44,11 +44,10 @@ repos:
     rev: v1.3.0
     hooks:
       - id: yesqa
-# TODO: Requires a MANIFEST.in file
-#  - repo: https://github.com/mgedmin/check-manifest
-#    rev: "0.48"
-#    hooks:
-#      - id: check-manifest
+  - repo: https://github.com/mgedmin/check-manifest
+    rev: "0.48"
+    hooks:
+      - id: check-manifest
   - repo: meta
     hooks:
       - id: check-hooks-apply
