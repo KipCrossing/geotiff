@@ -13,7 +13,7 @@ To help users and other contributors, be sure to:
 
 *Note:* The continuous integration has lint checking with **mypy**, so be sure to check it yourself before making a PR.
 
-To help with code compliance, we strongly suggest that contributors use `pre-commit`, an automatic git hook runner 
+To help with code compliance, we strongly suggest that contributors use `pre-commit`, an automatic git hook runner
 for ensuring that code meets compliance standards. It can be installed as follows:
 
 > $ cd geotiff
