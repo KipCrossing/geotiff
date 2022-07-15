@@ -1,3 +1,3 @@
 __author__ = "Kipling Crossing"
 
-from .geotiff import TifTransformer, GeoTiff
+from .geotiff import GeoTiff, TifTransformer

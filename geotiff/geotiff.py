@@ -1,9 +1,9 @@
 from typing import List, Optional, Tuple, Union
-from tifffile import imread, TiffFile  # type: ignore
-import numpy as np  # type: ignore
-from pyproj import Transformer, CRS
-import zarr  # type: ignore
 
+import numpy as np  # type: ignore
+import zarr  # type: ignore
+from pyproj import CRS, Transformer
+from tifffile import TiffFile, imread  # type: ignore
 
 BBox = Tuple[Tuple[float, float], Tuple[float, float]]
 BBoxInt = Tuple[Tuple[int, int], Tuple[int, int]]
@@ -123,7 +123,7 @@ class GeoTiff:
 
         """
         self.file = file
-        self._as_crs = crs_code if as_crs==None else as_crs
+        self._as_crs = crs_code if as_crs is None else as_crs
         tif = TiffFile(self.file)
 
         if not tif.is_geotiff:
@@ -182,7 +182,7 @@ class GeoTiff:
     def _get_crs_code(self, geotiff_metadata: dict) -> int:
         temp_crs_code: Optional[int] = None
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
-            if hasattr(geotiff_metadata["ProjectedCSTypeGeoKey"], 'value'):
+            if hasattr(geotiff_metadata["ProjectedCSTypeGeoKey"], "value"):
                 temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
             else:
                 # In the event that it's already an int.
@@ -380,7 +380,7 @@ class GeoTiff:
         Returns:
             Tuple[np.ndarray, np.ndarray]: 2d x coordinates and the 2d y coordinates
         """
-        if bBox == None:
+        if bBox is None:
             i_list = [i for i in range(self.tif_shape[1])]
             j_list = [i for i in range(self.tif_shape[0])]
             return self._convert_coords_array(
@@ -406,8 +406,8 @@ class GeoTiff:
         return self._z
 
     def read_box(
-        self, 
-        bBox: BBox, 
+        self,
+        bBox: BBox,
         outer_points: Union[bool, int] = False,
         aszarr: bool = False,
     ) -> Union[np.ndarray, zarr.Array]:
@@ -418,7 +418,7 @@ class GeoTiff:
             outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
             safe (bool): If True, returns a zarr array. If False, forces a returns as a numpy array by putting the data into memory.  Defaults to False.
 
-        
+
 
         Returns:
             np.ndarray: zarr array of the geotiff file
