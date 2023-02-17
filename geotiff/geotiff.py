@@ -104,6 +104,33 @@ class TifTransformer:
         transformed_xy: List[float] = transformed[:2]
         return (transformed_xy[0], transformed_xy[1])
 
+    def get_xy_array(
+        self, i_array: np.ndarray, j_array: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+
+        """Gets the (x or lon) and (y or lat) coordinates based on the array index (array version)
+
+        Args:
+            i_array (np.ndarray): indices in the x direction
+            j_array (np.ndarray): indices in the y direction
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: (x or lon) and (y or lat) coordinates
+        """
+
+        transforms = np.array(self.transforms, dtype=float)
+        vecs = np.vstack(
+            (
+                i_array,
+                j_array,
+                np.zeros(i_array.size, dtype=int),
+                np.ones(j_array.size, dtype=int),
+            ),
+            dtype=int,
+        )
+        xy = np.dot(transforms, vecs)
+        return xy[0, 0, :], xy[0, 1, :]
+
 
 class GeoTiff:
     def __init__(
@@ -205,19 +232,18 @@ class GeoTiff:
         else:
             raise GeographicTypeGeoKeyError()
 
-    def _populate_2d_array(self, i_list: List[int], j_list: List[int]) -> np.ndarray:
-        stack_em = lambda li, j: np.stack((np.array(li), np.ones(len(li)) * j), axis=-1)
-        return np.array([stack_em(i_list, j) for j in j_list])
-
     def _convert_coords_array(
-        self, from_crs_code: int, to_crs_code: int, i_list: List[int], j_list: List[int]
+        self,
+        from_crs_code: int,
+        to_crs_code: int,
+        i_array: np.ndarray,
+        j_array: np.ndarray,
     ):
-        ij_2d_array = self._populate_2d_array(i_list, j_list)
-        # convert to x_vals and y_vals via tiffTransformer
-        get_xy = lambda e: np.array(list(self.tifTrans.get_xy(e[0], e[1])))
-        xy_2d_array = np.apply_along_axis(get_xy, -1, ij_2d_array)
-        x_vals = xy_2d_array[:, :, 0]
-        y_vals = xy_2d_array[:, :, 1]
+
+        shape = (j_array.size, i_array.size)
+        ii, jj = [x.flatten() for x in np.meshgrid(i_array, j_array, indexing="xy")]
+        x_vals, y_vals = [x.reshape(shape) for x in self.tifTrans.get_xy_array(ii, jj)]
+
         from_crs_proj4 = CRS.from_epsg(from_crs_code)
         to_crs_proj4 = CRS.from_epsg(to_crs_code)
         transformer = Transformer.from_crs(from_crs_proj4, to_crs_proj4, always_xy=True)
@@ -381,19 +407,19 @@ class GeoTiff:
             Tuple[np.ndarray, np.ndarray]: 2d x coordinates and the 2d y coordinates
         """
         if bBox is None:
-            i_list = [i for i in range(self.tif_shape[1])]
-            j_list = [i for i in range(self.tif_shape[0])]
+            i_array = np.arange(self.tif_shape[1])
+            j_array = np.arange(self.tif_shape[0])
             return self._convert_coords_array(
-                self.crs_code, self.as_crs, i_list, j_list
+                self.crs_code, self.as_crs, i_array, j_array
             )
         elif isinstance(bBox, tuple):
             ((x_min, y_min), (x_max, y_max)) = self.get_int_box(
                 bBox, outer_points=outer_points
             )
-            i_list = [i for i in range(x_min, x_max)]
-            j_list = [i for i in range(y_min, y_max)]
+            i_array = np.arange(x_min, x_max)
+            j_array = np.arange(y_min, y_max)
             return self._convert_coords_array(
-                self.crs_code, self.as_crs, i_list, j_list
+                self.crs_code, self.as_crs, i_array, j_array
             )
         raise TypeError(f"You must supply a valid bBox. You gave: {bBox}")
 
