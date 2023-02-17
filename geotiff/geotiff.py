@@ -126,7 +126,6 @@ class TifTransformer:
                 np.zeros(i_array.size, dtype=int),
                 np.ones(j_array.size, dtype=int),
             ),
-            dtype=int,
         )
         xy = np.dot(transforms, vecs)
         return xy[0, 0, :], xy[0, 1, :]
