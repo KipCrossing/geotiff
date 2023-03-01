@@ -2,7 +2,7 @@ from setuptools import find_packages, setup  # type: ignore
 from setuptools.command.egg_info import egg_info  # type: ignore
 from setuptools.command.install import install  # type: ignore
 
-VERSION = "0.2.7"
+VERSION = "0.2.8"
 
 # Send to pypi
 # python3 setup.py sdist bdist_wheel
