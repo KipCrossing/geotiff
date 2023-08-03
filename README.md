@@ -2,13 +2,14 @@
 
 A noGDAL tool for reading geotiff files
 
-WARNING this package is under development and some features are unstable. Use with caution.
+> **Warning**
+> This package is under development and some features are unstable. Proceed with caution.
 
 Please support this project be giving it a [star on GitHub](https://github.com/Open-Source-Agriculture/geotiff)!
 
 ### What is noGDAL?
 
-**[noGDAL](https://kipling.medium.com/nogdal-e5b60b114a1c)** is a philosophy for developing geospatial programs in python without using GDAL.
+**[noGDAL](https://kipling.medium.com/nogdal-e5b60b114a1c)** is a philosophy for developing geospatial programs in Python without using GDAL.
 
 ### Installation
 
@@ -39,6 +40,7 @@ pip install -e .[dev]
 ```python
 from geotiff import GeoTiff
 
+tiff_file = "path/to/tiff/file"
 geo_tiff = GeoTiff(tiff_file)
 ```
 
@@ -59,7 +61,6 @@ Or you can use the original crs by setting `as_crs` to `None`:
 ```python
 geo_tiff = GeoTiff(tiff_file, as_crs=None)
 ```
-
 
 If the geotiff file has multiple bands, you can specify which band to use:
 
@@ -100,7 +101,7 @@ geo_tiff.get_wgs_84_coords(i, j)
 
 #### Read the data
 
-To read the data, use the `.read()` method. This will return a [zarr](https://zarr.readthedocs.io/en/stable/api/core.html) array as often geotiff files cannot fit into memory.
+To read the data, use the `.read()` method. This will return a [Zarr](https://zarr.readthedocs.io/en/stable/api/core.html) array as often geotiff files cannot fit into memory.
 
 ```python
 zarr_array = geo_tiff.read()
@@ -118,7 +119,8 @@ array = np.array(zarr_array)
 
 In many cases, you are only interested in a section of the tiff. For convenience, you can use the `.read_box()` method. This will return a numpy array.
 
-WARNING: This will fail if the box you are using is too large and the data cannot fit into memory.
+> **Warning**
+> This will fail if the box you are using is too large and the data cannot fit into memory.
 
 ```python
 from geotiff import GeoTiff
@@ -129,7 +131,8 @@ geo_tiff = GeoTiff(tiff_file)
 array = geo_tiff.read_box(area_box)
 ```
 
-*Note:* For the `area_box`, use the same crs as `as_crs`.
+> **Note**
+> For the `area_box`, use the same crs as `as_crs`.
 
 In some cases, you may want some extra points/pixels around the outside of your `area_box`. This may be useful if you want to interpolate to points near the area_box boundary. To achieve this, use the `outer_points` param:
 
@@ -188,14 +191,15 @@ lon_array, lat_array = geo_tiff.get_coord_arrays()
 
 If you would like to contribute to this project, please fork this repo and make a PR with your patches.
 
-You can join the conversation by saying hi in the [project discussion board](https://github.com/KipCrossing/geotiff/discussions).
+You can join the conversation by saying "hi" in the [project discussion board](https://github.com/KipCrossing/geotiff/discussions).
 
 To help users and other contributes, be sure to:
-- make doc blocs if appropriate
-- use typing wherever possible
-- format with black
+- Make docstrings and documentation blocks, if appropriate
+- Use Python typing wherever possible
+- Format your code with [Black](https://black.readthedocs.io/en/stable/index.html)
 
-*Note:* The continuous integration has lint checking with **mypy**, so be sure to check it yourself before making a PR.
+> **Note**
+> The continuous integration has lint checking with **mypy**, so be sure to check it yourself before making a PR.
 
 ### Project Road Map
 

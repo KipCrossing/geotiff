@@ -413,7 +413,7 @@ class GeoTiff:
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Gets the 2d x coordinates and the 2d y coordinates.
 
-        WARNING: This cannot handel big arrays (zarr), so use with caution
+        WARNING: This cannot handle big arrays (Zarr). Proceed with caution.
 
         Args:
             bBox (Optional[BBox], optional): The bounding box to git the coordinates within.
@@ -441,7 +441,7 @@ class GeoTiff:
         raise TypeError(f"You must supply a valid bBox. You gave: {bBox}")
 
     def read(self) -> zarr.Array:
-        """Reads the contents of the geotiff to a zarr array.
+        """Reads the contents of the geotiff to a Zarr array.
 
         Returns:
             np.ndarray: Zarr array of the geotiff file.
