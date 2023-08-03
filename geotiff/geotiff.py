@@ -1,3 +1,4 @@
+"""GeoTIFF reader and writer."""
 from typing import List, Optional, Tuple, Union
 
 import numpy as np  # type: ignore
@@ -10,25 +11,37 @@ BBoxInt = Tuple[Tuple[int, int], Tuple[int, int]]
 
 
 class GeographicTypeGeoKeyError(Exception):
+    """Raised when the GeographicTypeGeoKey is not recognized."""
+
     def __str__(_):
+        """Return the error message."""
         return "Could not recognize the geo key\nPlease submit an issue: \
                 https://github.com/Open-Source-Agriculture/geotiff/issues"
 
 
 class UserDefinedGeoKeyError(Exception):
+    """Raised when the UserDefinedGeoKey is not supported."""
+
     def __str__(_):
-        return "user-defined GeoKeys are not yet supported"
+        """Return the error message."""
+        return "User-defined GeoKeys are not yet supported."
 
 
 class BoundaryNotInTifError(Exception):
+    """Raised when the boundary is not in the tiff file."""
+
     pass
 
 
 class FileTypeError(Exception):
+    """Raised when the file type is not supported."""
+
     pass
 
 
 class TifTransformer:
+    """Class that transforms coordinates from the geotiff file to lat/lon coordinates."""
+
     def __init__(
         self,
         height: int,
@@ -36,11 +49,11 @@ class TifTransformer:
         scale: Tuple[float, float, float],
         tiepoints: List[float],
     ):
-        """for transforming the coordinates of the geotiff file
+        """For transforming the coordinates of the geotiff file.
 
         Args:
-            height (int): Hight (y) of the geotiff array/file
-            width (int): Width of the geotiff array/file
+            height (int): Height (y) of the geotiff array/file.
+            width (int): Width of the geotiff array/file.
             scale (Tuple[float, float, float]): (sx, sy, sz) from ModelPixelScaleTag
             tiepoints (List[float]): [description]
         """
@@ -63,39 +76,39 @@ class TifTransformer:
         self.transforms: List[List[List[float]]] = transforms
 
     def get_x(self, i: int, j: int) -> float:
-        """Gets the x or lon coordinate based on the array index
+        """Gets the x or lon coordinate based on the array index.
 
         Args:
-            i (int): index in the x direction
-            j (int): index in the y direction
+            i (int): Index in the x direction.
+            j (int): Index in the y direction.
 
         Returns:
-            float: x or lon coordinate
+            float: x or lon coordinate.
         """
         transformed: List[float] = np.dot(self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
         return transformed_xy[0]
 
     def get_y(self, i: int, j: int) -> float:
-        """Gets the y or lat coordinate based on the array index
+        """Gets the y or lat coordinate based on the array index.
 
         Args:
-            i (int): index in the x direction
-            j (int): index in the y direction
+            i (int): Index in the x direction.
+            j (int): Index in the y direction.
 
         Returns:
-            float: y or lat coordinate
+            float: y or lat coordinate.
         """
         transformed: List[float] = np.dot(self.transforms, [i, j, 0, 1]).tolist()[0]
         transformed_xy: List[float] = transformed[:2]
         return transformed_xy[1]
 
     def get_xy(self, i: int, j: int) -> Tuple[float, float]:
-        """Gets the (x or lon) and (y or lat) coordinates based on the array index
+        """Gets the (x or lon) and (y or lat) coordinates based on the array index.
 
         Args:
-            i (int): index in the x direction
-            j (int): index in the y direction
+            i (int): Index in the x direction.
+            j (int): Index in the y direction.
 
         Returns:
             Tuple[float, float]: (x or lon) and (y or lat) coordinates
@@ -107,17 +120,15 @@ class TifTransformer:
     def get_xy_array(
         self, i_array: np.ndarray, j_array: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
-
-        """Gets the (x or lon) and (y or lat) coordinates based on the array index (array version)
+        """Gets the (x or lon) and (y or lat) coordinates based on the array index (array version).
 
         Args:
-            i_array (np.ndarray): indices in the x direction
-            j_array (np.ndarray): indices in the y direction
+            i_array (np.ndarray): Indices in the x direction.
+            j_array (np.ndarray): Indices in the y direction.
 
         Returns:
-            Tuple[np.ndarray, np.ndarray]: (x or lon) and (y or lat) coordinates
+            Tuple[np.ndarray, np.ndarray]: (x or lon) and (y or lat) coordinates.
         """
-
         transforms = np.array(self.transforms, dtype=float)
         vecs = np.vstack(
             (
@@ -132,6 +143,8 @@ class TifTransformer:
 
 
 class GeoTiff:
+    """Class representing a geotiff object."""
+
     def __init__(
         self,
         file: str,
@@ -139,14 +152,14 @@ class GeoTiff:
         as_crs: Optional[int] = 4326,
         crs_code: Optional[int] = None,
     ):
-        """For representing a geotiff
+        """For representing a geotiff.
 
         Args:
-            file (str): Location of the geotiff file
+            file (str): Location of the geotiff file.
             band (int): The band of the tiff file to use. Defaults to 0.
-            as_crs (Optional[int]): The epsg crs code to read the data as.  Defaults to 4326 (WGS84).
-            crs_code (Optional[int]): The epsg crs code of the tiff file. Include this if the crs code can't be detected.
-
+            as_crs (Optional[int]): The epsg crs code to read the data as. Defaults to 4326 (WGS84).
+            crs_code (Optional[int]): The epsg crs code of the tiff file.
+              Include this if the crs code can't be detected.
         """
         self.file = file
         self._as_crs = crs_code if as_crs is None else as_crs
@@ -172,22 +185,27 @@ class GeoTiff:
 
     @property
     def crs_code(self):
+        """The epsg crs code of the tiff file."""
         return self._crs_code
 
     @property
     def as_crs(self):
+        """The epsg crs code to read the data as or to convert the data to."""
         return self._as_crs
 
     @property
     def tif_shape(self):
+        """The shape of the tiff file."""
         return self._tif_shape
 
     @property
     def tifTrans(self):
+        """The tif transformer object."""
         return self._tifTrans
 
     @property
     def tif_bBox(self):
+        """Returns the bounding box of the tiff in the native tiff coordinates."""
         return (
             self.tifTrans.get_xy(0, 0),
             self.tifTrans.get_xy(self.tif_shape[1], self.tif_shape[0]),
@@ -195,12 +213,14 @@ class GeoTiff:
 
     @property
     def tif_bBox_converted(self) -> BBox:
+        """Returns the bounding box of the tiff in the provided crs coordinates."""
         right_top = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[0])
         left_bottom = self._convert_coords(self.crs_code, self.as_crs, self.tif_bBox[1])
         return (right_top, left_bottom)
 
     @property
     def tif_bBox_wgs_84(self) -> BBox:
+        """Returns the bounding box of the tiff in WGS84 coordinates."""
         right_top = self._convert_coords(self.crs_code, 4326, self.tif_bBox[0])
         left_bottom = self._convert_coords(self.crs_code, 4326, self.tif_bBox[1])
         return (right_top, left_bottom)
@@ -238,18 +258,18 @@ class GeoTiff:
         i_array: np.ndarray,
         j_array: np.ndarray,
     ):
-
         shape = (j_array.size, i_array.size)
-        ii, jj = [x.flatten() for x in np.meshgrid(i_array, j_array, indexing="xy")]
-        x_vals, y_vals = [x.reshape(shape) for x in self.tifTrans.get_xy_array(ii, jj)]
+        ii, jj = (x.flatten() for x in np.meshgrid(i_array, j_array, indexing="xy"))
+        x_vals, y_vals = (x.reshape(shape) for x in self.tifTrans.get_xy_array(ii, jj))
 
         from_crs_proj4 = CRS.from_epsg(from_crs_code)
         to_crs_proj4 = CRS.from_epsg(to_crs_code)
         transformer = Transformer.from_crs(from_crs_proj4, to_crs_proj4, always_xy=True)
         return transformer.transform(x_vals, y_vals)
 
+    @staticmethod
     def _convert_coords(
-        self, from_crs_code: int, to_crs_code: int, xxyy: Tuple[float, float]
+        from_crs_code: int, to_crs_code: int, xxyy: Tuple[float, float]
     ) -> Tuple[float, float]:
         xx, yy = xxyy
         from_crs_proj4 = CRS.from_epsg(from_crs_code)
@@ -268,29 +288,27 @@ class GeoTiff:
         return int(step_y * (lat - self.tif_bBox[0][1]))
 
     def get_coords(self, i: int, j: int) -> Tuple[float, float]:
-        """for a given i, j in the entire tiff array,
-        returns the as_crs coordinates
+        """For a given i, j in the entire tiff array, returns the as_crs coordinates.
 
         Args:
-            i (int): col number of the array
-            j (int): row number of the array
+            i (int): Column number of the array.
+            j (int): Row number of the array.
 
         Returns:
-            Tuple[float, float]: lon, lat
+            Tuple[float, float]: lon, lat.
         """
         x, y = self.tifTrans.get_xy(i, j)
         return self._convert_coords(self.crs_code, self.as_crs, (x, y))
 
     def get_wgs_84_coords(self, i: int, j: int) -> Tuple[float, float]:
-        """for a given i, j in the entire tiff array,
-        returns the wgs_84 coordinates
+        """For a given i, j in the entire tiff array, returns the wgs_84 coordinates.
 
         Args:
-            i (int): col number of the array
-            j (int): row number of the array
+            i (int): Column number of the array.
+            j (int): Row number of the array.
 
         Returns:
-            Tuple[float, float]: lon, lat
+            Tuple[float, float]: lon, lat.
         """
         x, y = self.tifTrans.get_xy(i, j)
         return self._convert_coords(self.crs_code, 4326, (x, y))
@@ -306,21 +324,20 @@ class GeoTiff:
     def get_int_box(
         self, bBox: BBox, outer_points: Union[bool, int] = False
     ) -> BBoxInt:
-        """Gets the intiger array index values based on a bounding box
+        """Gets the integer array index values based on a bounding box.
 
         Args:
-            bBox (BBox): A bounding box
-            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
+            bBox (BBox): A bounding box.
+            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels
+              that directly surround the bBox. Defaults to False.
 
         Raises:
-            BoundaryNotInTifError: If the boundary is not enclosed withing the
-                                    outer cooridinated of the tiff
+            BoundaryNotInTifError: If the boundary is not enclosed within the outer coordinates of the tiff.
 
         Returns:
-            BBoxInt: array index values
+            BBoxInt: Array index values.
         """
-
-        # all 4 corners  of box
+        # all 4 corners of box
         left_top = bBox[0]
         right_bottom = bBox[1]
         left_bottom = (bBox[0][0], bBox[1][1])
@@ -376,12 +393,12 @@ class GeoTiff:
     def get_bBox_wgs_84(
         self, bBox: BBox, outer_points: Union[bool, int] = False
     ) -> BBox:
-        """takes a bounding area gets the coordinates of the extremities
-        as if they were clipped by that bounding area
+        """Takes a bounding area gets the coordinates of the extremities as if they were clipped by that bounding area.
 
         Args:
-            bBox (BBox): bounding box area to clip within (wgs_84)
-            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
+            bBox (BBox): bounding box area to clip within (wgs_84).
+            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels
+              that directly surround the bBox. Defaults to False.
 
         Returns:
             BBox: in wgs_84
@@ -394,16 +411,17 @@ class GeoTiff:
     def get_coord_arrays(
         self, bBox: Optional[BBox] = None, outer_points: int = 0
     ) -> Tuple[np.ndarray, np.ndarray]:
-        """gets the 2d x coordinates and the 2d y coordinates
+        """Gets the 2d x coordinates and the 2d y coordinates.
 
-        WARNING: this cannot handel big arrays (zarr), so use with caution
+        WARNING: This cannot handel big arrays (zarr), so use with caution
 
         Args:
-            bBox (Optional[BBox], optional): The bounding box to git the coordinates within
-            outer_points (int, optional): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox.
+            bBox (Optional[BBox], optional): The bounding box to git the coordinates within.
+            outer_points (int, optional): Takes an int (n) that gets extra n layers of points/pixels
+              that directly surround the bBox.
 
         Returns:
-            Tuple[np.ndarray, np.ndarray]: 2d x coordinates and the 2d y coordinates
+            Tuple[np.ndarray, np.ndarray]: 2d x coordinates and the 2d y coordinates.
         """
         if bBox is None:
             i_array = np.arange(self.tif_shape[1])
@@ -423,10 +441,10 @@ class GeoTiff:
         raise TypeError(f"You must supply a valid bBox. You gave: {bBox}")
 
     def read(self) -> zarr.Array:
-        """Reads the contents of the geotiff to a zarr array
+        """Reads the contents of the geotiff to a zarr array.
 
         Returns:
-            np.ndarray: zarr array of the geotiff file
+            np.ndarray: Zarr array of the geotiff file.
         """
         return self._z
 
@@ -436,17 +454,17 @@ class GeoTiff:
         outer_points: Union[bool, int] = False,
         aszarr: bool = False,
     ) -> Union[np.ndarray, zarr.Array]:
-        """Reads a boxed sections of the geotiff to a zarr/numpy array
+        """Reads a boxed sections of the geotiff to a zarr/numpy array.
 
         Args:
-            bBox (BBox): A bounding box
-            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels that directly surround the bBox. Defaults to False.
-            safe (bool): If True, returns a zarr array. If False, forces a returns as a numpy array by putting the data into memory.  Defaults to False.
-
-
+            bBox (BBox): A bounding box.
+            outer_points (Union[bool, int]): Takes an int (n) that gets extra n layers of points/pixels
+              that directly surround the bBox. Defaults to False.
+            aszarr (bool): If True, returns a zarr array. If False, forces a returns as a numpy array by
+              putting the data into memory. Defaults to False.
 
         Returns:
-            np.ndarray: zarr array of the geotiff file
+            np.ndarray: Zarr array of the geotiff file.
         """
         ((x_min, y_min), (x_max, y_max)) = self.get_int_box(
             bBox, outer_points=outer_points

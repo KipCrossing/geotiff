@@ -1,3 +1,4 @@
+"""Setup."""
 from setuptools import find_packages, setup  # type: ignore
 from setuptools.command.egg_info import egg_info  # type: ignore
 from setuptools.command.install import install  # type: ignore
