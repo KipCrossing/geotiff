@@ -1,4 +1,4 @@
 tifffile>=2021.7.2,<2022.4.28
 numpy
 pyproj
-zarr==2.14.*
+zarr==2.12.*
