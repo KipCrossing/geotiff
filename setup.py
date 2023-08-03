@@ -30,6 +30,7 @@ setup(
     url="https://github.com/Open-Source-Agriculture/geotiff",
     packages=find_packages(),
     classifiers=[
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
         "Natural Language :: English",
@@ -40,6 +41,8 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Topic :: Scientific/Engineering :: GIS",
+        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     python_requires=">=3.7",
     install_requires=requirements,
