@@ -1,4 +1,4 @@
-tifffile>=2023.4.12
+tifffile>=2021.7.4,!=2022.4.28
 numpy
 pyproj
 zarr>=2.10.0
