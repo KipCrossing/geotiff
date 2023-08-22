@@ -1,3 +1,4 @@
+"""CRS Guessing Module."""
 from difflib import SequenceMatcher
 from typing import List, Tuple
 
@@ -15,14 +16,13 @@ PreDict = List[Tuple[str, int]]
 
 
 def crs_code_gusser(GTCitationGeo: str) -> Tuple[int, float]:
-    """This is a very hacky solution to the problem of finding the correct
-    crs code based on the GTCitationGeoKey string.
+    """A very hacky solution to the problem of finding the correct crs code based on the GTCitationGeoKey string.
 
     Args:
-        GTCitationGeo (str): GT Citation Geo Key
+        GTCitationGeo (str): GT Citation Geo Key.
 
     Returns:
-        Tuple[int, float]: ([The crs code], [the score of the guess from 0 to 1])
+        Tuple[int, float]: ([The crs code], [the score of the guess from 0 to 1]).
     """
     crs_code: int = 32767
     projs: PreDict = [(name, member.value) for name, member in Proj.__members__.items()]
