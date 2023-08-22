@@ -1,5 +1,5 @@
 """GeoTIFF reader and writer."""
-from typing import List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np  # type: ignore
 import zarr  # type: ignore
@@ -225,8 +225,14 @@ class GeoTiff:
         left_bottom = self._convert_coords(self.crs_code, 4326, self.tif_bBox[1])
         return (right_top, left_bottom)
 
-    def _get_crs_code(self, geotiff_metadata: dict) -> int:
+    def _get_crs_code(self, geotiff_metadata: Optional[dict]) -> int:
         temp_crs_code: Optional[int] = None
+
+        if geotiff_metadata is None:
+            raise UserDefinedGeoKeyError(
+                "Can't detect the crs. Use as_crs to manually specify it."
+            )
+
         if geotiff_metadata["GTModelTypeGeoKey"].value == 1:
             if hasattr(geotiff_metadata["ProjectedCSTypeGeoKey"], "value"):
                 temp_crs_code = geotiff_metadata["ProjectedCSTypeGeoKey"].value
