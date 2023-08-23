@@ -178,7 +178,7 @@ class GeoTiff:
             self._crs_code: int = crs_code
         else:
             self._crs_code = self._get_crs_code(tif.geotiff_metadata)
-        self._tif_shape: List[int] = self._z.shape
+        self._tif_shape: List[int] = list(self._z.shape)
         scale: Tuple[float, float, float] = tif.geotiff_metadata["ModelPixelScale"]
         tilePoint: List[float] = tif.geotiff_metadata["ModelTiepoint"]
         self._tifTrans: TifTransformer = TifTransformer(
@@ -194,7 +194,9 @@ class GeoTiff:
     @property
     def as_crs(self):
         """The epsg crs code to read the data as or to convert the data to."""
-        return self._as_crs
+        if isinstance(self._as_crs, int):
+            return self._as_crs
+        raise TypeError("as_crs must be an int")
 
     @property
     def tif_shape(self):
@@ -445,7 +447,7 @@ class GeoTiff:
             )
         raise TypeError(f"You must supply a valid bBox. You gave: {bBox}")
 
-    def read(self) -> zarr.Array:
+    def read(self) -> Union[zarr.Array, zarr.Group]:
         """Reads the contents of the geotiff to a Zarr array.
 
         Returns:
