@@ -168,6 +168,9 @@ class GeoTiff:
         if not tif.is_geotiff:
             raise Exception("Not a geotiff file")
 
+        if not tif.geotiff_metadata:
+            raise Exception("No Metadata")
+
         store = tif.aszarr(key=band)
         self._z = zarr.open(store, mode="r")
         store.close()
