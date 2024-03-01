@@ -171,9 +171,9 @@ class GeoTiff:
         if not tif.geotiff_metadata:
             raise Exception("No Metadata")
 
-        store = tif.aszarr(key=band)
-        self._z = zarr.open(store, mode="r")
-        store.close()
+        self._store = tif.aszarr(key=band)
+        self._z = zarr.open(self._store, mode="r")
+        self._store.close()
         if isinstance(crs_code, int):
             self._crs_code: int = crs_code
         else:
@@ -481,3 +481,7 @@ class GeoTiff:
         if aszarr:
             return zarr.array(boxed_array)
         return np.array(boxed_array)
+
+    def close(self):
+        """Closes the geotiff file."""
+        self._store.close()
